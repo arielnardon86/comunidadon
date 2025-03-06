@@ -5,33 +5,40 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
 function Schedule({ reservations, setReservations, token }) {
   const [tables, setTables] = useState([]);
+  const [loading, setLoading] = useState(true); // Nuevo estado para carga
+  const [error, setError] = useState(null); // Nuevo estado para errores
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
 
-  // Usar siempre la URL local para desarrollo
   const apiUrl = "http://localhost:3001";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true); // Inicia la carga
+        setError(null); // Limpia errores previos
         const headers = { Authorization: `Bearer ${token}` };
 
         const tablesRes = await fetch(`${apiUrl}/api/tables`, { headers });
         if (!tablesRes.ok) {
-          throw new Error(`Error ${tablesRes.status}: No se pudieron obtener las mesas`);
+          const errorData = await tablesRes.json();
+          throw new Error(`Error ${tablesRes.status}: ${errorData.error || "No se pudieron obtener las mesas"}`);
         }
         const tablesData = await tablesRes.json();
         setTables(Array.isArray(tablesData) ? tablesData : []);
       } catch (error) {
         console.error("Error fetching tables:", error);
+        setError(error.message); // Guarda el error
+      } finally {
+        setLoading(false); // Termina la carga
       }
     };
 
     if (token) {
       fetchData();
     }
-  }, [token]); // Eliminar apiUrl de las dependencias
+  }, [token]);
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
@@ -50,13 +57,12 @@ function Schedule({ reservations, setReservations, token }) {
 
       if (!response.ok) {
         let errorMessage = "No se pudo realizar la reserva";
-        try{
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-        } catch (parseError){
-            console.error("Error parsing error response:", parseError);
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.error("Error parsing error response:", parseError);
         }
-
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
@@ -86,8 +92,12 @@ function Schedule({ reservations, setReservations, token }) {
         día en el que querés realizar tu reserva y luego seleccioná la mesa y
         el turno haciendo click y listo!
       </p>
-      {tables && tables.length === 0 ? (
+      {loading ? (
         <p>Cargando mesas...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>Error: {error}</p>
+      ) : tables.length === 0 ? (
+        <p>No hay mesas disponibles</p>
       ) : (
         <table border="1" className="calendar-table">
           <thead>

@@ -1,10 +1,26 @@
 import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import mysql from "mysql2/promise";
+import sql from "mssql";
 import * as dotenv from "dotenv";
 
 dotenv.config();
+
+// Validar variables de entorno
+const requiredEnvVars = ["DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME"];
+const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error(`❌ Faltan las siguientes variables de entorno: ${missingVars.join(", ")}`);
+  process.exit(1);
+}
+
+console.log("Valores de entorno cargados:");
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_USER:", process.env.DB_USER);
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
+console.log("DB_NAME:", process.env.DB_NAME);
+console.log("DB_PORT:", process.env.DB_PORT);
 
 const app = express();
 
@@ -22,22 +38,38 @@ const SECRET_KEY = process.env.SECRET_KEY || "super_secreto";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1234";
 
-// ✅ Configuración del pool de conexiones a MySQL en Google Cloud SQL
-const pool = mysql.createPool({
-  host: process.env.DB_HOST, // Dirección del servidor de MySQL en Google Cloud
+// ✅ Configuración del pool de conexiones a Azure SQL
+const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
+  server: process.env.DB_HOST,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 1433,
-  waitForConnections: true,
-  connectionLimit: 10, // Máximo de conexiones activas
-  queueLimit: 0,
-});
+  port: Number(process.env.DB_PORT) || 1433,
+  options: {
+    encrypt: true,
+    trustServerCertificate: false,
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+  requestTimeout: 30000,
+  connectionTimeout: 30000,
+};
+
+const pool = new sql.ConnectionPool(dbConfig);
+
+// ✅ Conectar al pool al iniciar
+pool
+  .connect()
+  .then(() => console.log("✅ Conectado a Azure SQL"))
+  .catch((err) => console.error("❌ Error al conectar al pool:", err));
 
 // ✅ Función para obtener una conexión del pool
 async function getDBConnection() {
   try {
-    return await pool.getConnection();
+    return await pool.connect();
   } catch (err) {
     console.error("❌ Error al obtener conexión a la BD:", err);
     throw err;
@@ -76,18 +108,18 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// ✅ Ruta de prueba para verificar conexión a MySQL
+// ✅ Ruta de prueba para verificar conexión a Azure SQL
 app.get("/api/test-db", async (req, res) => {
   let connection;
   try {
     connection = await getDBConnection();
-    const [rows] = await connection.query("SELECT 1 + 1 AS result");
-    res.json({ success: true, result: rows[0].result });
+    const result = await connection.request().query("SELECT 1 + 1 AS result");
+    res.json({ success: true, result: result.recordset[0].result });
   } catch (error) {
     console.error("❌ Error al conectar con la BD:", error);
-    res.status(500).json({ error: "Error al conectar con la base de datos" });
+    res.status(500).json({ error: "Error al conectar con la base de datos", details: error.message });
   } finally {
-    if (connection) connection.release(); // ✅ Liberar conexión
+    if (connection) connection.close();
   }
 });
 
@@ -96,13 +128,28 @@ app.get("/api/tables", verifyToken, async (req, res) => {
   let connection;
   try {
     connection = await getDBConnection();
-    const [tables] = await connection.query("SELECT * FROM tables");
-    res.status(200).json(tables);
+    const result = await connection.request().query("SELECT * FROM tables");
+    res.status(200).json(result.recordset);
   } catch (error) {
     console.error("❌ Error al obtener mesas:", error);
     res.status(500).json({ error: "No se pudieron obtener las mesas" });
   } finally {
-    if (connection) connection.release(); // ✅ Liberar conexión
+    if (connection) connection.close();
+  }
+});
+
+// ✅ Ruta para obtener las reservas
+app.get("/api/reservations", verifyToken, async (req, res) => {
+  let connection;
+  try {
+    connection = await getDBConnection();
+    const result = await connection.request().query("SELECT * FROM reservations");
+    res.status(200).json(result.recordset);
+  } catch (error) {
+    console.error("❌ Error al obtener reservas:", error);
+    res.status(500).json({ error: "No se pudieron obtener las reservas" });
+  } finally {
+    if (connection) connection.close();
   }
 });
 
@@ -119,27 +166,40 @@ app.post("/api/reservations", verifyToken, async (req, res) => {
     connection = await getDBConnection();
 
     // Verificar si la mesa ya está reservada
-    const [existing] = await connection.query(
-      "SELECT * FROM reservations WHERE table_id = ? AND turno = ? AND date = ?",
-      [tableId, turno, date]
-    );
+    const existing = await connection
+      .request()
+      .input("tableId", sql.Int, tableId)
+      .input("turno", sql.NVarChar, turno)
+      .input("date", sql.Date, date)
+      .query("SELECT * FROM reservations WHERE table_id = @tableId AND turno = @turno AND date = @date");
 
-    if (existing.length > 0) {
+    if (existing.recordset.length > 0) {
       return res.status(400).json({ error: "Mesa ya reservada en ese turno" });
     }
 
     // Insertar la reserva
-    const [result] = await connection.query(
-      "INSERT INTO reservations (table_id, turno, date, username) VALUES (?, ?, ?, ?)",
-      [tableId, turno, date, req.user.username]
-    );
+    const result = await connection
+      .request()
+      .input("tableId", sql.Int, tableId)
+      .input("turno", sql.NVarChar, turno)
+      .input("date", sql.Date, date)
+      .input("username", sql.NVarChar, req.user.username)
+      .query(
+        "INSERT INTO reservations (table_id, turno, date, username) VALUES (@tableId, @turno, @date, @username); SELECT SCOPE_IDENTITY() as id"
+      );
 
-    res.status(201).json({ id: result.insertId, tableId, turno, date, username: req.user.username });
+    res.status(201).json({
+      id: result.recordset[0].id,
+      tableId,
+      turno,
+      date,
+      username: req.user.username,
+    });
   } catch (error) {
     console.error("❌ Error al realizar reserva:", error);
-    res.status(500).json({ error: "No se pudo realizar la reserva" });
+    res.status(500).json({ error: "No se pudo realizar la reserva", details: error.message });
   } finally {
-    if (connection) connection.release(); // ✅ Liberar conexión
+    if (connection) connection.close();
   }
 });
 
