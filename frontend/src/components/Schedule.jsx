@@ -36,7 +36,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
-      // Recargar todas las reservas desde el backend
+      // Si la reserva se crea con éxito, recargar las reservas
       const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,6 +53,16 @@ function Schedule({ tables, reservations, setReservations, token }) {
       });
     } catch (error) {
       console.error("Error al reservar:", error);
+      // Recargar reservas incluso en caso de error para mantener el estado actualizado
+      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (reservationsRes.ok) {
+        const updatedReservations = await reservationsRes.json();
+        setReservations(updatedReservations);
+      } else {
+        console.error("Error al recargar reservas después de error:", reservationsRes.status);
+      }
       Swal.fire({
         icon: "error",
         title: "Error en el servidor",
@@ -115,7 +125,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
                   );
                 })}
               </tr>
-            ))}
+          ))}
           </tbody>
         </table>
       )}
