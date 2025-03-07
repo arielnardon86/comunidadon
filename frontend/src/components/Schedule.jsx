@@ -1,13 +1,15 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo, faSpinner } from "@fortawesome/free-solid-svg-icons"; // Importar íconos
+import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons"; // Importar faUserPlus
 
-function Schedule({ tables, reservations, setReservations, token }) {
+function Schedule({ tables, reservations, setReservations, token, username }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [isLoading, setIsLoading] = useState(false); // Estado para controlar la carga
+  const [newUsername, setNewUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
@@ -16,7 +18,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
   };
 
   const handleReservationClick = async (tableId, turno) => {
-    setIsLoading(true); // Activar el estado de carga
+    setIsLoading(true);
     try {
       const response = await fetch(`${apiUrl}/api/reservations`, {
         method: "POST",
@@ -38,7 +40,6 @@ function Schedule({ tables, reservations, setReservations, token }) {
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
-      // Si la reserva se crea con éxito, recargar las reservas
       const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -81,13 +82,59 @@ function Schedule({ tables, reservations, setReservations, token }) {
         text: error.message,
       });
     } finally {
-      setIsLoading(false); // Desactivar el estado de carga al finalizar
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (!newUsername || !newPassword) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Username y password son obligatorios",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username: newUsername, password: newPassword }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al registrar usuario");
+      }
+
+      const data = await response.json();
+      Swal.fire({
+        icon: "success",
+        title: "Registro exitoso",
+        text: "¡Nuevo usuario registrado!",
+      });
+      setNewUsername("");
+      setNewPassword("");
+    } catch (error) {
+      console.error("Error al registrar:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Overlay para mostrar el spinner mientras se carga */}
       {isLoading && (
         <div
           style={{
@@ -121,10 +168,10 @@ function Schedule({ tables, reservations, setReservations, token }) {
       {tables.length === 0 ? (
         <p
           style={{
-            color: "#ff4444", // Color rojo para destacar
+            color: "#ff4444",
             fontSize: "1.2em",
             fontWeight: "bold",
-            animation: "blink 1.5s infinite", // Animación de parpadeo
+            animation: "blink 1.5s infinite",
           }}
         >
           Cargando calendario de reservas...
@@ -190,7 +237,41 @@ function Schedule({ tables, reservations, setReservations, token }) {
           </tbody>
         </table>
       )}
-      {/* Definir la animación de parpadeo */}
+      {/* Formulario de registro visible solo para admin */}
+      {username === "admin" && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Registrar Nuevo Usuario</h3>
+          <form onSubmit={handleRegister}>
+            <div>
+              <label>Username:</label>
+              <input
+                type="text"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div>
+              <label>Password:</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{ marginTop: "10px" }}
+            >
+              <FontAwesomeIcon icon={faUserPlus} /> Registrar Usuario
+            </button>
+          </form>
+        </div>
+      )}
       <style>
         {`
           @keyframes blink {
