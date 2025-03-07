@@ -1,12 +1,13 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo, faSpinner } from "@fortawesome/free-solid-svg-icons"; // Importar el ícono de spinner
 
 function Schedule({ tables, reservations, setReservations, token }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [isLoading, setIsLoading] = useState(false); // Estado para controlar la carga
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
@@ -15,6 +16,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
   };
 
   const handleReservationClick = async (tableId, turno) => {
+    setIsLoading(true); // Activar el estado de carga
     try {
       const response = await fetch(`${apiUrl}/api/reservations`, {
         method: "POST",
@@ -54,7 +56,6 @@ function Schedule({ tables, reservations, setReservations, token }) {
       });
     } catch (error) {
       console.error("Error al reservar:", error);
-      // Recargar reservas incluso en caso de error para mantener el estado actualizado
       const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,7 +63,6 @@ function Schedule({ tables, reservations, setReservations, token }) {
         const updatedReservations = await reservationsRes.json();
         setReservations(updatedReservations);
         console.log("Reservas recargadas después de error:", updatedReservations);
-        // Forzar actualización si la reserva ya existe
         const isAlreadyReserved = updatedReservations.some(
           (res) =>
             res.tableId === tableId &&
@@ -80,11 +80,38 @@ function Schedule({ tables, reservations, setReservations, token }) {
         title: "Error en el servidor",
         text: error.message,
       });
+    } finally {
+      setIsLoading(false); // Desactivar el estado de carga al finalizar
     }
   };
 
   return (
-    <div>
+    <div style={{ position: "relative" }}>
+      {/* Overlay para mostrar el spinner mientras se carga */}
+      {isLoading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo semi-transparente
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <FontAwesomeIcon
+            icon={faSpinner}
+            spin
+            size="3x"
+            style={{ color: "white" }}
+          />
+        </div>
+      )}
+
       <h2>Realiza tu reserva</h2>
       <p>
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
@@ -102,6 +129,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
                   type="date"
                   value={selectedDate}
                   onChange={handleDateChange}
+                  disabled={isLoading} // Desactivar el input de fecha mientras se carga
                 />
               </th>
               <th>Mediodía</th>
@@ -110,7 +138,6 @@ function Schedule({ tables, reservations, setReservations, token }) {
           </thead>
           <tbody>
             {tables.map((table) => {
-              // Filtrar reservas por fecha seleccionada para optimizar comparaciones
               const filteredReservations = reservations.filter(
                 (res) => res.date === selectedDate
               );
@@ -134,11 +161,15 @@ function Schedule({ tables, reservations, setReservations, token }) {
                         style={{
                           backgroundColor: isReserved ? "red" : "green",
                           color: "white",
-                          cursor: isReserved ? "default" : "pointer",
+                          cursor:
+                            isLoading || isReserved ? "not-allowed" : "pointer", // Cambiar cursor si está cargando o reservado
+                          opacity: isLoading ? 0.5 : 1, // Reducir opacidad mientras carga
                         }}
                         onClick={() =>
-                          !isReserved && handleReservationClick(table.id, turno)
-                        }
+                          !isLoading &&
+                          !isReserved &&
+                          handleReservationClick(table.id, turno)
+                        } // Desactivar clics mientras se carga
                       >
                         {isReserved ? "🟥 Reservado" : "🟩 Disponible"}
                       </td>
