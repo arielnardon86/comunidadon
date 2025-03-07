@@ -8,7 +8,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
     new Date().toISOString().split("T")[0]
   );
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+  const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);

@@ -14,8 +14,7 @@ function App() {
   const [date, setDate] = useState("");
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // Define la URL base usando una variable de entorno
-  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3001";
+  const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -55,7 +54,7 @@ function App() {
 
       fetchData();
     }
-  }, [token, apiUrl]); // Agrega apiUrl como dependencia
+  }, [token, apiUrl]);
 
   const handleReserve = async () => {
     if (!selectedTable || !selectedTurn || !date) {
@@ -125,7 +124,7 @@ function App() {
           Libertad 231 - Villa Carlos Paz
       </p>
       <Schedule
-        tables={tables} // Pasa las mesas como prop
+        tables={tables}
         reservations={reservations}
         setReservations={setReservations}
         token={token}
