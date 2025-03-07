@@ -8,8 +8,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
     new Date().toISOString().split("T")[0]
   );
 
-  // Define la URL base usando una variable de entorno
-  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3001";
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
