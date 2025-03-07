@@ -6,12 +6,14 @@ function Login({ setToken }) {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage(""); // Limpiar errores anteriores
 
     try {
-      const response = await fetch("http://localhost:3001/api/login", { // Cambiar a tu backend local
+      const response = await fetch(`${apiUrl}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
