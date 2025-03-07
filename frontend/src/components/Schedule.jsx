@@ -1,13 +1,14 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons"; // Importar faUserPlus
+import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
 function Schedule({ tables, reservations, setReservations, token, username }) {
+  console.log("Props received in Schedule:", { username }); // Log para depuración
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [isLoading, setIsLoading] = useState(false); // Estado para controlar la carga
+  const [isLoading, setIsLoading] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -237,35 +238,67 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
           </tbody>
         </table>
       )}
-      {/* Formulario de registro visible solo para admin */}
       {username === "admin" && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>Registrar Nuevo Usuario</h3>
-          <form onSubmit={handleRegister}>
-            <div>
-              <label>Username:</label>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "20px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            backgroundColor: "#f9f9f9",
+          }}
+        >
+          <h3 style={{ color: "#333" }}>Registrar Nuevo Usuario</h3>
+          <form
+            onSubmit={handleRegister}
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
+                Username:
+              </label>
               <input
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 disabled={isLoading}
                 required
+                style={{
+                  padding: "8px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                }}
               />
             </div>
-            <div>
-              <label>Password:</label>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
+                Password:
+              </label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={isLoading}
                 required
+                style={{
+                  padding: "8px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                }}
               />
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              style={{ marginTop: "10px" }}
+              style={{
+                marginTop: "10px",
+                padding: "10px",
+                backgroundColor: "#4CAF50",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: isLoading ? "not-allowed" : "pointer",
+              }}
             >
               <FontAwesomeIcon icon={faUserPlus} /> Registrar Usuario
             </button>
