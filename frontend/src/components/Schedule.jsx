@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo, faSpinner } from "@fortawesome/free-solid-svg-icons"; // Importar el ícono de spinner
+import { faCircleInfo, faSpinner } from "@fortawesome/free-solid-svg-icons"; // Importar íconos
 
 function Schedule({ tables, reservations, setReservations, token }) {
   const [selectedDate, setSelectedDate] = useState(
@@ -96,7 +96,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo semi-transparente
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -119,7 +119,16 @@ function Schedule({ tables, reservations, setReservations, token }) {
         el turno haciendo click y listo!
       </p>
       {tables.length === 0 ? (
-        <p>No hay mesas disponibles</p>
+        <p
+          style={{
+            color: "#ff4444", // Color rojo para destacar
+            fontSize: "1.2em",
+            fontWeight: "bold",
+            animation: "blink 1.5s infinite", // Animación de parpadeo
+          }}
+        >
+          Cargando calendario de reservas...
+        </p>
       ) : (
         <table border="1" className="calendar-table">
           <thead>
@@ -129,7 +138,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
                   type="date"
                   value={selectedDate}
                   onChange={handleDateChange}
-                  disabled={isLoading} // Desactivar el input de fecha mientras se carga
+                  disabled={isLoading}
                 />
               </th>
               <th>Mediodía</th>
@@ -162,14 +171,14 @@ function Schedule({ tables, reservations, setReservations, token }) {
                           backgroundColor: isReserved ? "red" : "green",
                           color: "white",
                           cursor:
-                            isLoading || isReserved ? "not-allowed" : "pointer", // Cambiar cursor si está cargando o reservado
-                          opacity: isLoading ? 0.5 : 1, // Reducir opacidad mientras carga
+                            isLoading || isReserved ? "not-allowed" : "pointer",
+                          opacity: isLoading ? 0.5 : 1,
                         }}
                         onClick={() =>
                           !isLoading &&
                           !isReserved &&
                           handleReservationClick(table.id, turno)
-                        } // Desactivar clics mientras se carga
+                        }
                       >
                         {isReserved ? "🟥 Reservado" : "🟩 Disponible"}
                       </td>
@@ -181,6 +190,16 @@ function Schedule({ tables, reservations, setReservations, token }) {
           </tbody>
         </table>
       )}
+      {/* Definir la animación de parpadeo */}
+      <style>
+        {`
+          @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+          }
+        `}
+      </style>
     </div>
   );
 }
