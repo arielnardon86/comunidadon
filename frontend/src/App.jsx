@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapPin } from "@fortawesome/free-solid-svg-icons";
 import Login from "./Login.jsx";
 import Register from "./components/Register";
+import jwtDecode from "jwt-decode"; // Importar jwt-decode
 
 function App() {
   const [tables, setTables] = useState([]);
@@ -20,9 +21,14 @@ function App() {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
-      // Decodificar el token para obtener el username
-      const decoded = JSON.parse(atob(storedToken.split(".")[1]));
-      setUsername(decoded.username);
+      try {
+        const decoded = jwtDecode(storedToken); // Decodificar con jwt-decode
+        console.log("Decoded token:", decoded); // Log para depuración
+        setUsername(decoded.username || ""); // Asegurar que username esté definido
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setUsername("");
+      }
     }
   }, []);
 
