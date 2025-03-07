@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMapPin } from "@fortawesome/free-solid-svg-icons";
 import Login from "./Login.jsx";
 import Register from "./components/Register";
-import jwtDecode from "jwt-decode"; // Importar jwt-decode
+import { jwtDecode } from "jwt-decode";
 
 function App() {
   const [tables, setTables] = useState([]);
