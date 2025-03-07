@@ -45,6 +45,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
       }
       const updatedReservations = await reservationsRes.json();
       setReservations(updatedReservations);
+      console.log("Reservas actualizadas:", updatedReservations);
 
       Swal.fire({
         icon: "success",
@@ -60,6 +61,17 @@ function Schedule({ tables, reservations, setReservations, token }) {
       if (reservationsRes.ok) {
         const updatedReservations = await reservationsRes.json();
         setReservations(updatedReservations);
+        console.log("Reservas recargadas después de error:", updatedReservations);
+        // Forzar actualización si la reserva ya existe
+        const isAlreadyReserved = updatedReservations.some(
+          (res) =>
+            res.tableId === tableId &&
+            res.turno === turno &&
+            res.date === selectedDate
+        );
+        if (isAlreadyReserved) {
+          setReservations([...updatedReservations]); // Forzar actualización del estado
+        }
       } else {
         console.error("Error al recargar reservas después de error:", reservationsRes.status);
       }
@@ -107,6 +119,12 @@ function Schedule({ tables, reservations, setReservations, token }) {
                       res.turno === turno &&
                       res.date === selectedDate
                   );
+                  console.log("Checking reservation:", {
+                    tableId: table.id,
+                    turno,
+                    date: selectedDate,
+                    isReserved,
+                  });
 
                   return (
                     <td
@@ -125,7 +143,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
                   );
                 })}
               </tr>
-          ))}
+            ))}
           </tbody>
         </table>
       )}
