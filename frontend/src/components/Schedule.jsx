@@ -70,7 +70,7 @@ function Schedule({ tables, reservations, setReservations, token }) {
             res.date === selectedDate
         );
         if (isAlreadyReserved) {
-          setReservations([...updatedReservations]); // Forzar actualización del estado
+          setReservations([...updatedReservations]);
         }
       } else {
         console.error("Error al recargar reservas después de error:", reservationsRes.status);
@@ -109,41 +109,44 @@ function Schedule({ tables, reservations, setReservations, token }) {
             </tr>
           </thead>
           <tbody>
-            {tables.map((table) => (
-              <tr key={table.id}>
-                <td>{table.name}</td>
-                {["mediodía", "noche"].map((turno) => {
-                  const isReserved = reservations.some(
-                    (res) =>
-                      res.tableId === table.id &&
-                      res.turno === turno &&
-                      res.date === selectedDate
-                  );
-                  console.log("Checking reservation:", {
-                    tableId: table.id,
-                    turno,
-                    date: selectedDate,
-                    isReserved,
-                  });
+            {tables.map((table) => {
+              // Filtrar reservas por fecha seleccionada para optimizar comparaciones
+              const filteredReservations = reservations.filter(
+                (res) => res.date === selectedDate
+              );
+              return (
+                <tr key={table.id}>
+                  <td>{table.name}</td>
+                  {["mediodía", "noche"].map((turno) => {
+                    const isReserved = filteredReservations.some(
+                      (res) => res.tableId === table.id && res.turno === turno
+                    );
+                    console.log("Checking reservation:", {
+                      tableId: table.id,
+                      turno,
+                      date: selectedDate,
+                      isReserved,
+                    });
 
-                  return (
-                    <td
-                      key={turno}
-                      style={{
-                        backgroundColor: isReserved ? "red" : "green",
-                        color: "white",
-                        cursor: isReserved ? "default" : "pointer",
-                      }}
-                      onClick={() =>
-                        !isReserved && handleReservationClick(table.id, turno)
-                      }
-                    >
-                      {isReserved ? "🟥 Reservado" : "🟩 Disponible"}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+                    return (
+                      <td
+                        key={turno}
+                        style={{
+                          backgroundColor: isReserved ? "red" : "green",
+                          color: "white",
+                          cursor: isReserved ? "default" : "pointer",
+                        }}
+                        onClick={() =>
+                          !isReserved && handleReservationClick(table.id, turno)
+                        }
+                      >
+                        {isReserved ? "🟥 Reservado" : "🟩 Disponible"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
