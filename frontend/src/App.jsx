@@ -84,8 +84,15 @@ function App() {
         throw new Error(`Error ${response.status}: No se pudo realizar la reserva`);
       }
 
-      const data = await response.json();
-      setReservations((prevReservations) => [...prevReservations, data]);
+      // Recarga las reservas desde el backend
+      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!reservationsRes.ok) {
+        throw new Error(`Error ${reservationsRes.status}: No se pudieron obtener las reservas`);
+      }
+      const updatedReservations = await reservationsRes.json();
+      setReservations(Array.isArray(updatedReservations) ? updatedReservations : []);
 
       Swal.fire({
         icon: "success",

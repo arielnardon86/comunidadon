@@ -36,8 +36,15 @@ function Schedule({ tables, reservations, setReservations, token }) {
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
-      const data = await response.json();
-      setReservations((prevReservations) => [...prevReservations, data]);
+      // Recargar todas las reservas desde el backend
+      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!reservationsRes.ok) {
+        throw new Error("Error al recargar reservas");
+      }
+      const updatedReservations = await reservationsRes.json();
+      setReservations(updatedReservations);
 
       Swal.fire({
         icon: "success",
