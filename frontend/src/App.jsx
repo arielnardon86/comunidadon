@@ -12,25 +12,25 @@ function App() {
   const [tables, setTables] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [showRegister, setShowRegister] = useState(false);
+  const [showRegister, setShowRegister] = useState(false); // Ya no será necesario, pero lo mantendremos por ahora
   const [username, setUsername] = useState(""); // Estado para el username
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
+    if (token) {
       try {
-        const decoded = jwtDecode(storedToken); // Decodificar con jwt-decode
-        console.log("Decoded token:", decoded); // Log para depuración
-        setUsername(decoded.username || ""); // Asegurar que username esté definido
+        const decoded = jwtDecode(token); // Usar el estado token directamente
+        console.log("Decoded token:", decoded);
+        setUsername(decoded.username || "");
       } catch (error) {
         console.error("Error decoding token:", error);
         setUsername("");
       }
+    } else {
+      setUsername(""); // Limpiar username si no hay token
     }
-  }, []);
+  }, [token]); // Dependencia en token para que se ejecute cuando token cambie
 
   useEffect(() => {
     if (token) {
@@ -79,9 +79,10 @@ function App() {
         ) : (
           <Login setToken={setToken} setShowRegister={setShowRegister} />
         )}
-        <button onClick={() => setShowRegister(!showRegister)}>
+        {/* Eliminar este botón */}
+        {/* <button onClick={() => setShowRegister(!showRegister)}>
           {showRegister ? "Volver a Iniciar Sesión" : "Registrarse"}
-        </button>
+        </button> */}
       </div>
     );
   }
@@ -99,7 +100,7 @@ function App() {
         reservations={reservations}
         setReservations={setReservations}
         token={token}
-        username={username} // Pasar el username al componente Schedule
+        username={username}
       />
       <div style={{ maxWidth: "600px", margin: "20px auto" }}>
         <ClubInfo />
