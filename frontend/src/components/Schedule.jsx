@@ -87,6 +87,63 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
     }
   };
 
+  const handleCancelReservation = async (reservationId) => {
+    const confirmCancel = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción cancelará la reserva. No se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "No, mantener",
+    });
+
+    if (!confirmCancel.isConfirmed) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/reservations/${reservationId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al cancelar la reserva");
+      }
+
+      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!reservationsRes.ok) {
+        throw new Error("Error al recargar reservas");
+      }
+      const updatedReservations = await reservationsRes.json();
+      setReservations(updatedReservations);
+      console.log("Reservas actualizadas después de cancelar:", updatedReservations);
+
+      Swal.fire({
+        icon: "success",
+        title: "Reserva cancelada",
+        text: "La reserva ha sido cancelada con éxito.",
+      });
+    } catch (error) {
+      console.error("Error al cancelar la reserva:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!newUsername || !newPassword) {
@@ -166,6 +223,13 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         día en el que querés realizar tu reserva y luego seleccioná la mesa y
         el turno haciendo click y listo!
       </p>
+      {username === "admin" && (
+        <p style={{ color: "#666", marginTop: "5px" }}>
+          <FontAwesomeIcon icon={faCircleInfo} /> Como administrador, puedes
+          cancelar reservas! Para hacerlo, haz click en la reserva que desas
+          cancelar.
+        </p>
+      )}
       <div style={{ maxWidth: "600px", margin: "0 auto" }}>
         {tables.length === 0 ? (
           <p
@@ -225,15 +289,32 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                           style={{
                             backgroundColor: isReserved ? "red" : "green",
                             color: "white",
-                            cursor:
-                              isLoading || isReserved ? "not-allowed" : "pointer",
+                            cursor: isLoading
+                              ? "not-allowed"
+                              : isReserved && username === "admin"
+                              ? "pointer"
+                              : isReserved
+                              ? "not-allowed"
+                              : "pointer",
                             opacity: isLoading ? 0.5 : 1,
+                            fontSize: "0.9em",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                           }}
-                          onClick={() =>
-                            !isLoading &&
-                            !isReserved &&
-                            handleReservationClick(table.id, turno)
+                          title={
+                            isReserved && username === "admin"
+                              ? `Reservado por: ${reservation.username}`
+                              : ""
                           }
+                          onClick={() => {
+                            if (isLoading) return;
+                            if (isReserved && username === "admin") {
+                              handleCancelReservation(reservation.id);
+                            } else if (!isReserved) {
+                              handleReservationClick(table.id, turno);
+                            }
+                          }}
                         >
                           {isReserved
                             ? username === "admin"
