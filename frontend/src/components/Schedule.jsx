@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
 function Schedule({ tables, reservations, setReservations, token, username }) {
-  console.log("Props received in Schedule:", { username }); // Log para depuración
+  console.log("Props received in Schedule:", { username });
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -166,145 +166,160 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         día en el que querés realizar tu reserva y luego seleccioná la mesa y
         el turno haciendo click y listo!
       </p>
-      {tables.length === 0 ? (
-        <p
-          style={{
-            color: "#ff4444",
-            fontSize: "1.2em",
-            fontWeight: "bold",
-            animation: "blink 1.5s infinite",
-          }}
-        >
-          Cargando calendario de reservas...
-        </p>
-      ) : (
-        <table border="1" className="calendar-table">
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={handleDateChange}
-                  disabled={isLoading}
-                />
-              </th>
-              <th>Mediodía</th>
-              <th>Noche</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tables.map((table) => {
-              const filteredReservations = reservations.filter(
-                (res) => res.date === selectedDate
-              );
-              return (
-                <tr key={table.id}>
-                  <td>{table.name}</td>
-                  {["mediodía", "noche"].map((turno) => {
-                    const isReserved = filteredReservations.some(
-                      (res) => res.tableId === table.id && res.turno === turno
-                    );
-                    console.log("Checking reservation:", {
-                      tableId: table.id,
-                      turno,
-                      date: selectedDate,
-                      isReserved,
-                    });
-
-                    return (
-                      <td
-                        key={turno}
-                        style={{
-                          backgroundColor: isReserved ? "red" : "green",
-                          color: "white",
-                          cursor:
-                            isLoading || isReserved ? "not-allowed" : "pointer",
-                          opacity: isLoading ? 0.5 : 1,
-                        }}
-                        onClick={() =>
-                          !isLoading &&
-                          !isReserved &&
-                          handleReservationClick(table.id, turno)
-                        }
-                      >
-                        {isReserved ? "🟥 Reservado" : "🟩 Disponible"}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-      {username === "admin" && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            backgroundColor: "#f9f9f9",
-          }}
-        >
-          <h3 style={{ color: "#333" }}>Registrar Nuevo Usuario</h3>
-          <form
-            onSubmit={handleRegister}
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+        {tables.length === 0 ? (
+          <p
+            style={{
+              color: "#ff4444",
+              fontSize: "1.2em",
+              fontWeight: "bold",
+              animation: "blink 1.5s infinite",
+            }}
           >
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
-                Username:
-              </label>
-              <input
-                type="text"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                disabled={isLoading}
-                required
-                style={{
-                  padding: "8px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
-              />
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
-                Password:
-              </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                disabled={isLoading}
-                required
-                style={{
-                  padding: "8px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              style={{
-                marginTop: "10px",
-                padding: "10px",
-                backgroundColor: "#4CAF50",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: isLoading ? "not-allowed" : "pointer",
-              }}
+            Cargando calendario de reservas...
+          </p>
+        ) : (
+          <table
+            border="1"
+            className="calendar-table"
+            style={{ width: "100%", boxSizing: "border-box" }}
+          >
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                    disabled={isLoading}
+                  />
+                </th>
+                <th>Mediodía</th>
+                <th>Noche</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tables.map((table) => {
+                const filteredReservations = reservations.filter(
+                  (res) => res.date === selectedDate
+                );
+                return (
+                  <tr key={table.id}>
+                    <td>{table.name}</td>
+                    {["mediodía", "noche"].map((turno) => {
+                      const reservation = filteredReservations.find(
+                        (res) => res.tableId === table.id && res.turno === turno
+                      );
+                      const isReserved = !!reservation;
+                      console.log("Checking reservation:", {
+                        tableId: table.id,
+                        turno,
+                        date: selectedDate,
+                        isReserved,
+                        reservedBy: reservation?.username,
+                      });
+
+                      return (
+                        <td
+                          key={turno}
+                          style={{
+                            backgroundColor: isReserved ? "red" : "green",
+                            color: "white",
+                            cursor:
+                              isLoading || isReserved ? "not-allowed" : "pointer",
+                            opacity: isLoading ? 0.5 : 1,
+                          }}
+                          onClick={() =>
+                            !isLoading &&
+                            !isReserved &&
+                            handleReservationClick(table.id, turno)
+                          }
+                        >
+                          {isReserved
+                            ? username === "admin"
+                              ? `🟥 Reservado por: ${reservation.username}`
+                              : "🟥 Reservado"
+                            : "🟩 Disponible"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+        {username === "admin" && (
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "20px",
+              border: "1px solid #ccc",
+              borderRadius: "5px",
+              backgroundColor: "#f9f9f9",
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            <h3 style={{ color: "#333" }}>Registrar Nuevo Usuario</h3>
+            <form
+              onSubmit={handleRegister}
+              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
             >
-              <FontAwesomeIcon icon={faUserPlus} /> Registrar Usuario
-            </button>
-          </form>
-        </div>
-      )}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
+                  Username:
+                </label>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  style={{
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
+                  Password:
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  style={{
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  marginTop: "10px",
+                  padding: "10px",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: isLoading ? "not-allowed" : "pointer",
+                }}
+              >
+                <FontAwesomeIcon icon={faUserPlus} /> Registrar Usuario
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
       <style>
         {`
           @keyframes blink {
