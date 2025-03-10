@@ -2,9 +2,10 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { useParams } from "react-router-dom";
 
 function Schedule({ tables, reservations, setReservations, token, username }) {
-  console.log("Props received in Schedule:", { username });
+  const { building } = useParams(); // Obtener el edificio desde la URL
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -21,7 +22,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
   const handleReservationClick = async (tableId, turno) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/reservations`, {
+      const response = await fetch(`${apiUrl}/${building}/api/reservations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,7 +42,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
-      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+      const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!reservationsRes.ok) {
@@ -58,7 +59,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
       });
     } catch (error) {
       console.error("Error al reservar:", error);
-      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+      const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (reservationsRes.ok) {
@@ -105,7 +106,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/reservations/${reservationId}`, {
+      const response = await fetch(`${apiUrl}/${building}/api/reservations/${reservationId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -117,7 +118,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         throw new Error(errorData.error || "Error al cancelar la reserva");
       }
 
-      const reservationsRes = await fetch(`${apiUrl}/api/reservations`, {
+      const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!reservationsRes.ok) {
@@ -157,7 +158,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/register`, {
+      const response = await fetch(`${apiUrl}/${building}/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -217,7 +218,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         </div>
       )}
 
-      <h2>Realiza tu reserva</h2>
+      <h2>Realiza tu reserva - {building.toUpperCase()}</h2>
       <p>
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
         día en el que querés realizar tu reserva y luego seleccioná la mesa y

@@ -1,19 +1,29 @@
-import React, { useState } from "react";
-import "./Login.css";
+import { useState } from "react";
+import Swal from "sweetalert2";
+import { useParams } from "react-router-dom";
+import "./styles/Login.css"; // Importa el archivo CSS
+
+// Objeto de mapeo para las imágenes de fondo
+const backgroundImages = {
+  vow: "/src/assets/backgrounds/vow-background.jpg",
+  "edificio-x": "/src/assets/backgrounds/edificio-x-portada.jpg",
+  // Agrega más edificios aquí según sea necesario
+};
 
 function Login({ setToken }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { building } = useParams();
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage(""); // Limpiar errores anteriores
+    setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/api/login`, {
+      const response = await fetch(`${apiUrl}/${building}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -23,38 +33,67 @@ function Login({ setToken }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setErrorMessage(errorData.error || "Login failed");
-        throw new Error(errorData.error || "Login failed");
+        throw new Error(errorData.error || "Error al iniciar sesión");
       }
 
       const data = await response.json();
       localStorage.setItem("token", data.token);
       setToken(data.token);
+
+      Swal.fire({
+        icon: "success",
+        title: "Login exitoso",
+        text: "Bienvenido!",
+      });
     } catch (error) {
-      alert(error.message);
+      console.error("Error al iniciar sesión:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Determinar la imagen de fondo según el edificio
+  const backgroundImage = backgroundImages[building] || "/src/assets/backgrounds/default-portada.jpg";
+
   return (
-    <div className="login-container">
+    <div
+      className="login-container"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+      }}
+    >
       <div className="login-box">
-        <h2>Iniciar Sesión</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="text"
-            placeholder="Usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button type="submit">Ingresar</button>
+        <h2>Iniciar Sesión - {building.toUpperCase()}</h2>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Usuario:</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <div>
+            <label>Contraseña:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Cargando..." : "Iniciar Sesión"}
+          </button>
         </form>
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
       </div>
     </div>
   );

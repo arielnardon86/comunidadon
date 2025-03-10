@@ -1,111 +1,128 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import Schedule from "./components/Schedule";
-import ClubInfo from "./ClubInfo";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapPin } from "@fortawesome/free-solid-svg-icons";
+import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login.jsx";
-import Register from "./components/Register";
-import { jwtDecode } from "jwt-decode";
+import Schedule from "./components/Schedule.jsx";
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [username, setUsername] = useState(null);
   const [tables, setTables] = useState([]);
   const [reservations, setReservations] = useState([]);
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [showRegister, setShowRegister] = useState(false); // Ya no será necesario, pero lo mantendremos por ahora
-  const [username, setUsername] = useState(""); // Estado para el username
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
   useEffect(() => {
     if (token) {
-      try {
-        const decoded = jwtDecode(token); // Usar el estado token directamente
-        console.log("Decoded token:", decoded);
-        setUsername(decoded.username || "");
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        setUsername("");
-      }
+      const decoded = JSON.parse(atob(token.split(".")[1]));
+      setUsername(decoded.username);
     } else {
-      setUsername(""); // Limpiar username si no hay token
+      setUsername(null);
     }
-  }, [token]); // Dependencia en token para que se ejecute cuando token cambie
+  }, [token]);
 
   useEffect(() => {
     if (token) {
-      const fetchData = async () => {
+      const decoded = JSON.parse(atob(token.split(".")[1]));
+      const building = decoded.building;
+      const fetchTables = async () => {
         try {
-          const headers = { Authorization: `Bearer ${token}` };
-
-          const tablesRes = await fetch(`${apiUrl}/api/tables`, { headers });
-          if (!tablesRes.ok) {
-            throw new Error(`Error ${tablesRes.status}: No se pudo obtener las mesas`);
-          }
-          const tablesData = await tablesRes.json();
-          setTables(Array.isArray(tablesData) ? tablesData : []);
-
-          const reservationsRes = await fetch(`${apiUrl}/api/reservations`, { headers });
-          if (!reservationsRes.ok) {
-            throw new Error(`Error ${reservationsRes.status}: No se pudieron obtener las reservas`);
-          }
-          const reservationsData = await reservationsRes.json();
-          setReservations(Array.isArray(reservationsData) ? reservationsData : []);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Hubo un problema al obtener los datos del servidor.",
+          const response = await fetch(`${apiUrl}/${building}/api/tables`, {
+            headers: { Authorization: `Bearer ${token}` },
           });
+          if (!response.ok) {
+            throw new Error("Error al obtener mesas");
+          }
+          const data = await response.json();
+          setTables(data);
+        } catch (error) {
+          console.error("Error al obtener mesas:", error);
         }
       };
 
-      fetchData();
+      const fetchReservations = async () => {
+        try {
+          const response = await fetch(`${apiUrl}/${building}/api/reservations`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!response.ok) {
+            throw new Error("Error al obtener reservas");
+          }
+          const data = await response.json();
+          setReservations(data);
+        } catch (error) {
+          console.error("Error al obtener reservas:", error);
+        }
+      };
+
+      fetchTables();
+      fetchReservations();
     }
-  }, [token, apiUrl]);
+  }, [token]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken(null);
-    setUsername("");
+    setUsername(null);
+    setTables([]);
+    setReservations([]);
   };
 
-  if (!token) {
-    return (
-      <div className="p-4">
-        {showRegister ? (
-          <Register setToken={setToken} setShowRegister={setShowRegister} />
-        ) : (
-          <Login setToken={setToken} setShowRegister={setShowRegister} />
-        )}
-        {/* Eliminar este botón */}
-        {/* <button onClick={() => setShowRegister(!showRegister)}>
-          {showRegister ? "Volver a Iniciar Sesión" : "Registrarse"}
-        </button> */}
-      </div>
-    );
-  }
-
   return (
-    <div className="p-4">
-      <button onClick={handleLogout}>Cerrar Sesión</button>
-      <h1>Edificio Vow</h1>
-      <p>
-        <FontAwesomeIcon icon={faMapPin} />
-          Libertad 231 - Villa Carlos Paz
-      </p>
-      <Schedule
-        tables={tables}
-        reservations={reservations}
-        setReservations={setReservations}
-        token={token}
-        username={username}
-      />
-      <div style={{ maxWidth: "600px", margin: "20px auto" }}>
-        <ClubInfo />
+    <Router>
+      <div className="p-4">
+        {token && (
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold">
+              Sistema de Reservas - {username === "admin" ? "Admin" : "Usuario"}
+            </h1>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+        )}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              token ? (
+                <Navigate to="/vow" replace />
+              ) : (
+                <Navigate to="/vow/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/:building/login"
+            element={
+              !token ? (
+                <Login setToken={setToken} />
+              ) : (
+                <Navigate to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}`} replace />
+              )
+            }
+          />
+          <Route
+            path="/:building"
+            element={
+              token ? (
+                <Schedule
+                  tables={tables}
+                  reservations={reservations}
+                  setReservations={setReservations}
+                  token={token}
+                  username={username}
+                />
+              ) : (
+                <Navigate to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}/login`} replace />
+              )
+            }
+          />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 
