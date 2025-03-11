@@ -3,13 +3,10 @@ import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";
-import "../styles/Schedule.css"; // Importar el nuevo archivo CSS
+import "../styles/Schedule.css";
 
-function Schedule({ tables, reservations, setReservations, token, username }) {
+function Schedule({ tables, reservations, setReservations, token, username, selectedDate, setSelectedDate }) {
   const { building } = useParams();
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
   const [isLoading, setIsLoading] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -43,15 +40,22 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
-      const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!reservationsRes.ok) {
-        throw new Error("Error al recargar reservas");
-      }
-      const updatedReservations = await reservationsRes.json();
-      setReservations(updatedReservations);
-      console.log("Reservas actualizadas:", updatedReservations);
+      const fetchUpdatedReservations = async () => {
+        const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!reservationsRes.ok) {
+          throw new Error("Error al recargar reservas");
+        }
+        const updatedReservations = await reservationsRes.json();
+        setReservations(updatedReservations);
+        console.log("Reservas actualizadas:", updatedReservations);
+      };
+
+      await fetchUpdatedReservations();
+      setTimeout(async () => {
+        await fetchUpdatedReservations();
+      }, 1000);
 
       Swal.fire({
         icon: "success",
@@ -64,7 +68,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (reservationsRes.ok) {
-        const updatedReservations = await reservationsRes.json();
+        const updatedReservations = await response.json();
         setReservations(updatedReservations);
         console.log("Reservas recargadas después de error:", updatedReservations);
         const isAlreadyReserved = updatedReservations.some(
@@ -221,7 +225,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
 
       <p className="info-text">
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
-        día en el que querés realizar tu reserva y luego seleccioná la mesa y
+        día en el que querés realizar tu reserva y luego seleccioná la cancha y
         el turno haciendo click y listo!
       </p>
       {username === "admin" && (
@@ -231,14 +235,17 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
           cancelar.
         </p>
       )}
-      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
         {tables.length === 0 ? (
           <p className="loading-message">
             Cargando calendario de reservas...
           </p>
         ) : (
-          <div className="calendar-container">
-            <table className="calendar-table">
+          <div
+            className="calendar-container"
+            style={{ width: "100%", maxWidth: "800px", margin: "0 auto", borderRadius: "8px", overflow: "auto", border: "1px solid #ccc", backgroundColor: "#f9f9f9" }}
+          >
+            <table className="calendar-table" style={{ width: "100%" }}>
               <thead>
                 <tr>
                   <th>
@@ -249,8 +256,8 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                       disabled={isLoading}
                     />
                   </th>
-                  <th>Mediodía</th>
-                  <th>Noche</th>
+                  <th style={{ width: "150px" }}>Mediodía</th>
+                  <th style={{ width: "150px" }}>Noche</th>
                 </tr>
               </thead>
               <tbody>
@@ -260,7 +267,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                   );
                   return (
                     <tr key={table.id}>
-                      <td>{table.name}</td>
+                      <td style={{ width: "100px" }}>{table.name}</td>
                       {["mediodía", "noche"].map((turno) => {
                         const reservation = filteredReservations.find(
                           (res) => res.tableId === table.id && res.turno === turno
@@ -277,6 +284,7 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                         return (
                           <td
                             key={turno}
+                            style={{ width: "150px", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                             className={`${isReserved ? "reserved" : "available"} ${
                               isReserved && username === "admin" ? "admin" : ""
                             } ${isLoading ? "disabled" : ""}`}
@@ -309,25 +317,35 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
             </table>
           </div>
         )}
-        {username === "admin" && (
+      </div>
+
+      {/* Mover el formulario de registro a un contenedor separado */}
+      {username === "admin" && (
+        <div
+          style={{
+            maxWidth: "800px",
+            margin: "0 auto",
+            marginTop: "10px",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
           <div
             style={{
-              marginTop: "10px",
               padding: "20px",
               border: "1px solid #ccc",
               borderRadius: "5px",
               backgroundColor: "#f9f9f9",
               width: "100%",
-              maxWidth: "100%",
               boxSizing: "border-box",
             }}
           >
             <h3 style={{ color: "#333" }}>Registrar Nuevo Usuario</h3>
             <form
               onSubmit={handleRegister}
-              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+              style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
                 <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
                   Username:
                 </label>
@@ -341,10 +359,12 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                     padding: "8px",
                     borderRadius: "4px",
                     border: "1px solid #ccc",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
                 <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
                   Password:
                 </label>
@@ -358,6 +378,8 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                     padding: "8px",
                     borderRadius: "4px",
                     border: "1px solid #ccc",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
@@ -372,14 +394,16 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
                   border: "none",
                   borderRadius: "4px",
                   cursor: isLoading ? "not-allowed" : "pointer",
+                  width: "100%",
                 }}
               >
                 <FontAwesomeIcon icon={faUserPlus} /> Registrar Usuario
               </button>
             </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
       <style>
         {`
           @keyframes blink {

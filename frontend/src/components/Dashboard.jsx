@@ -8,6 +8,7 @@ function Dashboard({ token, username, tables, reservations, setReservations, set
   const { building } = useParams();
   const [localTables, setLocalTables] = useState(tables);
   const [localReservations, setLocalReservations] = useState(reservations);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +19,10 @@ function Dashboard({ token, username, tables, reservations, setReservations, set
       navigate(`/${building}/login`, { replace: true });
     }
   }, [token, building, navigate]);
+
+  useEffect(() => {
+    setLocalReservations(reservations);
+  }, [reservations]);
 
   const fetchTables = async () => {
     const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
@@ -42,14 +47,14 @@ function Dashboard({ token, username, tables, reservations, setReservations, set
       if (!response.ok) throw new Error("Error fetching reservations");
       const data = await response.json();
       setLocalReservations(data);
+      setReservations(data);
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
   return (
-    <div className="container mx-auto p-4 relative dashboard-container">
-      {/* Botón de cerrar sesión en la esquina superior derecha */}
+    <div className="relative dashboard-container" style={{ maxWidth: "800px", margin: "0 auto", padding: "0 1rem" }}>
       <div className="absolute top-0 right-0 mt-4 mr-4">
         <button
           onClick={handleLogout}
@@ -59,17 +64,21 @@ function Dashboard({ token, username, tables, reservations, setReservations, set
         </button>
       </div>
 
-      {/* Título y contenido principal */}
       <div>
         <h2 className="text-xl font-semibold mb-6">Realiza tu reserva</h2>
-        <Schedule
-          tables={localTables}
-          reservations={localReservations}
-          setReservations={setReservations}
-          token={token}
-          username={username}
-        />
-        <div className="mt-4">
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <Schedule
+            key={Date.now()}
+            tables={localTables}
+            reservations={localReservations}
+            setReservations={setLocalReservations}
+            token={token}
+            username={username}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+          />
+        </div>
+        <div style={{ maxWidth: "800px", margin: "0 auto" }} className="mt-4">
           <ClubInfo token={token} username={username} />
         </div>
       </div>

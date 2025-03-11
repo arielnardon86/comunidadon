@@ -1,135 +1,103 @@
-/* frontend/src/styles/Schedule.css */
-
-.calendar-container {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-  
-  .calendar-table {
+.calendar-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 0;
+    margin: 0 auto;
   }
   
   .calendar-table th,
   .calendar-table td {
-    padding: 10px;
-    border-bottom: 1px solid #e2e8f0;
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
   }
   
   .calendar-table th {
-    text-align: center;
-    color: #4a5568;
+    background-color: #f4f4f4;
+    font-weight: bold;
   }
   
-  .calendar-table td {
-    text-align: center;
-    font-size: 0.9em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* Estilo específico para las celdas de los nombres de las mesas (primera columna) */
-  .calendar-table td:first-child {
-    color: #2d3748; /* Texto oscuro para legibilidad */
-    background-color: #f8fafc; /* Fondo claro */
-    text-align: left;
-  }
-  
-  /* Estilo para las celdas de estado (Disponible/Reservado) */
-  .calendar-table td:not(:first-child) {
+  .available {
+    background-color: #4CAF50;
     color: white;
-    border-radius: 4px; /* Bordes redondeados como en la imagen */
-  }
-  
-  .calendar-table .available {
-    background-color: #8be1a8; /* Gris azulado para "No disponible" */
     cursor: pointer;
   }
   
-  .calendar-table .reserved {
-    background-color: #c87c7c; /* Verde para "Tu reserva" */
-    cursor: not-allowed;
+  .reserved {
+    background-color: #f28c82;
+    color: white;
   }
   
-  .calendar-table .reserved.admin {
+  .reserved.admin {
+    background-color: #f28c82;
     cursor: pointer;
   }
   
-  .calendar-table .disabled {
+  .disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   
-  .calendar-table input[type="date"] {
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .loading-message {
-    color: #ff4444;
-    font-size: 1.2em;
-    font-weight: bold;
-    animation: blink 1.5s infinite;
-  }
-  
   .info-text {
-    color: #666;
     margin-bottom: 10px;
   }
   
-  .info-text.admin {
-    margin-top: 5px;
-  }
-  
-  .legend {
-    display: flex;
-    gap: 10px;
-    font-size: 0.8em;
+  .loading-message {
+    text-align: center;
     color: #666;
-    margin-top: 10px;
   }
   
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .legend-color {
-    width: 15px;
-    height: 15px;
-    border-radius: 2px;
-  }
-  
+  /* Media query para pantallas pequeñas (por debajo de 640px) */
   @media (max-width: 640px) {
-    .calendar-container {
-      padding: 10px;
+    .calendar-table {
+      display: block; /* Cambiar a bloque para permitir ajuste */
+      overflow-x: auto; /* Agregar scroll horizontal si es necesario */
     }
   
     .calendar-table th,
     .calendar-table td {
-      padding: 8px;
-      font-size: 0.85em;
+      padding: 6px; /* Reducir padding para ahorrar espacio */
+      min-width: 80px; /* Ajustar ancho mínimo */
     }
   
-    .calendar-table td:not(:first-child) {
-      border-radius: 3px; /* Bordes redondeados más pequeños en móviles */
+    .calendar-table th {
+      font-size: 0.9rem; /* Reducir tamaño de fuente */
+    }
+  
+    .calendar-table td {
+      font-size: 0.85rem; /* Reducir tamaño de fuente */
+    }
+  
+    /* Ajustar ancho de columnas para que sean más flexibles */
+    .calendar-table th:first-child,
+    .calendar-table td:first-child {
+      min-width: 80px; /* Reducir ancho mínimo de la primera columna */
+    }
+  
+    .calendar-table th:nth-child(2),
+    .calendar-table td:nth-child(2),
+    .calendar-table th:nth-child(3),
+    .calendar-table td:nth-child(3) {
+      min-width: 100px; /* Ajustar ancho mínimo de las otras columnas */
     }
   }
   
-  @keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; }
-    100% { opacity: 1; }
+  /* Opcional: Ajuste adicional para pantallas muy pequeñas (por debajo de 480px) */
+  @media (max-width: 480px) {
+    .calendar-table th,
+    .calendar-table td {
+      padding: 4px; /* Reducir aún más el padding */
+      font-size: 0.75rem; /* Reducir tamaño de fuente */
+    }
+  
+    .calendar-table th:first-child,
+    .calendar-table td:first-child {
+      min-width: 60px; /* Reducir ancho mínimo */
+    }
+  
+    .calendar-table th:nth-child(2),
+    .calendar-table td:nth-child(2),
+    .calendar-table th:nth-child(3),
+    .calendar-table td:nth-child(3) {
+      min-width: 80px; /* Reducir ancho mínimo */
+    }
   }

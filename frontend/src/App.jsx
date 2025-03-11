@@ -3,12 +3,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login";
 import Dashboard from "./components/Dashboard";
 import './App.css';
+import Swal from "sweetalert2"; // Asegúrate de importar Swal si no está instalado
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [username, setUsername] = useState("");
-  const [tables, setTables] = useState([]); // Añadir estado para tables
-  const [reservations, setReservations] = useState([]); // Añadir estado para reservations
+  const [tables, setTables] = useState([]);
+  const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
     if (token) {
@@ -17,7 +18,7 @@ function App() {
         setUsername(decodedToken.username);
       } catch (error) {
         console.error("Error decoding token:", error);
-        setToken(null); // Limpiar token si es inválido
+        setToken(null);
         localStorage.removeItem("token");
       }
     } else {
@@ -25,11 +26,19 @@ function App() {
     }
   }, [token]);
 
-  // Función para cerrar sesión desde App.jsx
+  // Función para cerrar sesión con mensaje de despedida
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUsername("");
+    Swal.fire({
+      icon: "success",
+      title: "Sesión cerrada",
+      text: "¡Hasta pronto!",
+      timer: 1500, // Muestra el mensaje durante 1.5 segundos
+      showConfirmButton: false, // Sin botón de confirmación
+    }).then(() => {
+      localStorage.removeItem("token");
+      setToken(null);
+      setUsername("");
+    });
   };
 
   return (
@@ -60,8 +69,8 @@ function App() {
               tables={tables}
               reservations={reservations}
               setReservations={setReservations}
-              setToken={setToken} // Pasar setToken a Dashboard
-              handleLogout={handleLogout} // Pasar handleLogout a Dashboard
+              setToken={setToken}
+              handleLogout={handleLogout}
             />
           ) : (
             <Navigate to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}/login`} replace />
