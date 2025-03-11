@@ -1,4 +1,21 @@
-.calendar-table {
+.calendar-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .calendar-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+  }
+  
+  .calendar-table {
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
@@ -7,13 +24,16 @@
   .calendar-table th,
   .calendar-table td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 8px 1px;
     text-align: center;
+    box-sizing: border-box;
+    vertical-align: middle;
   }
   
   .calendar-table th {
     background-color: #f4f4f4;
     font-weight: bold;
+    font-size: 1rem;
   }
   
   .available {
@@ -48,56 +68,81 @@
   
   /* Media query para pantallas pequeñas (por debajo de 640px) */
   @media (max-width: 640px) {
+    .calendar-wrapper {
+      max-width: none;
+      width: 100vw;
+      margin: 0;
+    }
+  
+    .calendar-container {
+      max-width: none;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+  
     .calendar-table {
-      display: block; /* Cambiar a bloque para permitir ajuste */
-      overflow-x: auto; /* Agregar scroll horizontal si es necesario */
+      width: 100%; /* Asegurar que la tabla ocupe el 100% del contenedor */
+      min-width: 0; /* Eliminar cualquier restricción de ancho mínimo */
+      table-layout: fixed; /* Forzar que las columnas se ajusten al ancho del contenedor */
     }
   
     .calendar-table th,
     .calendar-table td {
-      padding: 6px; /* Reducir padding para ahorrar espacio */
-      min-width: 80px; /* Ajustar ancho mínimo */
+      width: 33.33%; /* Distribuir las columnas equitativamente (3 columnas = 33.33% cada una) */
+      padding: 4px 0.5px;
+      font-size: 0.6rem;
+      min-width: 0; /* Eliminar min-width para que las columnas se ajusten */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   
-    .calendar-table th {
-      font-size: 0.9rem; /* Reducir tamaño de fuente */
-    }
-  
-    .calendar-table td {
-      font-size: 0.85rem; /* Reducir tamaño de fuente */
-    }
-  
-    /* Ajustar ancho de columnas para que sean más flexibles */
     .calendar-table th:first-child,
     .calendar-table td:first-child {
-      min-width: 80px; /* Reducir ancho mínimo de la primera columna */
+      width: 33.33%; /* Asegurar que la primera columna también tenga el mismo ancho */
     }
   
     .calendar-table th:nth-child(2),
     .calendar-table td:nth-child(2),
     .calendar-table th:nth-child(3),
     .calendar-table td:nth-child(3) {
-      min-width: 100px; /* Ajustar ancho mínimo de las otras columnas */
+      width: 33.33%; /* Mantener distribución equitativa */
+    }
+  
+    .calendar-table th input[type="date"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 2px;
+      font-size: 0.6rem;
     }
   }
   
-  /* Opcional: Ajuste adicional para pantallas muy pequeñas (por debajo de 480px) */
+  /* Media query para pantallas muy pequeñas (por debajo de 480px) */
   @media (max-width: 480px) {
+    .calendar-wrapper {
+      width: 100vw;
+      margin: 0;
+    }
+  
+    .calendar-container {
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+    }
+  
     .calendar-table th,
     .calendar-table td {
-      padding: 4px; /* Reducir aún más el padding */
-      font-size: 0.75rem; /* Reducir tamaño de fuente */
+      padding: 3px 0.25px;
+      font-size: 0.55rem;
+      width: 33.33%; /* Mantener distribución equitativa */
     }
   
-    .calendar-table th:first-child,
-    .calendar-table td:first-child {
-      min-width: 60px; /* Reducir ancho mínimo */
-    }
-  
-    .calendar-table th:nth-child(2),
-    .calendar-table td:nth-child(2),
-    .calendar-table th:nth-child(3),
-    .calendar-table td:nth-child(3) {
-      min-width: 80px; /* Reducir ancho mínimo */
+    .calendar-table th input[type="date"] {
+      font-size: 0.55rem;
+      padding: 1px;
     }
   }

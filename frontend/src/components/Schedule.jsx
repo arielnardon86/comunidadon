@@ -235,17 +235,14 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
           cancelar.
         </p>
       )}
-      <div style={{ maxWidth: "800px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
+      <div className="calendar-wrapper">
         {tables.length === 0 ? (
           <p className="loading-message">
             Cargando calendario de reservas...
           </p>
         ) : (
-          <div
-            className="calendar-container"
-            style={{ width: "100%", maxWidth: "800px", margin: "0 auto", borderRadius: "8px", overflow: "auto", border: "1px solid #ccc", backgroundColor: "#f9f9f9" }}
-          >
-            <table className="calendar-table" style={{ width: "100%" }}>
+          <div className="calendar-container">
+            <table className="calendar-table">
               <thead>
                 <tr>
                   <th>
@@ -256,8 +253,8 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
                       disabled={isLoading}
                     />
                   </th>
-                  <th style={{ width: "150px" }}>Mediodía</th>
-                  <th style={{ width: "150px" }}>Noche</th>
+                  <th>Mediodía</th>
+                  <th>Noche</th>
                 </tr>
               </thead>
               <tbody>
@@ -267,7 +264,7 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
                   );
                   return (
                     <tr key={table.id}>
-                      <td style={{ width: "100px" }}>{table.name}</td>
+                      <td>{table.name}</td>
                       {["mediodía", "noche"].map((turno) => {
                         const reservation = filteredReservations.find(
                           (res) => res.tableId === table.id && res.turno === turno
@@ -284,7 +281,7 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
                         return (
                           <td
                             key={turno}
-                            style={{ width: "150px", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                            style={{ textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                             className={`${isReserved ? "reserved" : "available"} ${
                               isReserved && username === "admin" ? "admin" : ""
                             } ${isLoading ? "disabled" : ""}`}
@@ -304,7 +301,11 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
                           >
                             {isReserved
                               ? username === "admin"
-                                ? `Reservado por: ${reservation.username}`
+                                ? window.innerWidth <= 640
+                                  ? reservation.username.length > 5
+                                    ? `${reservation.username.slice(0, 5)}...`
+                                    : reservation.username
+                                  : `Reservado por: ${reservation.username}`
                                 : "Reservado"
                               : "Disponible"}
                           </td>
