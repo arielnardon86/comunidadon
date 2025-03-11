@@ -218,7 +218,6 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         </div>
       )}
 
-      <h2>Realiza tu reserva - {building.toUpperCase()}</h2>
       <p>
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
         día en el que querés realizar tu reserva y luego seleccioná la mesa y
