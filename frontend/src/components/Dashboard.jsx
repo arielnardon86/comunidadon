@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Schedule from "./Schedule";
 import ClubInfo from "./ClubInfo";
 
-function Dashboard({ token, username, tables, reservations, setReservations }) {
+function Dashboard({ token, username, tables, reservations, setReservations, setToken, handleLogout }) {
   const { building } = useParams();
   const [localTables, setLocalTables] = useState(tables);
   const [localReservations, setLocalReservations] = useState(reservations);
@@ -14,8 +14,10 @@ function Dashboard({ token, username, tables, reservations, setReservations }) {
     if (token) {
       fetchTables();
       fetchReservations();
+    } else {
+      navigate(`/${building}/login`, { replace: true });
     }
-  }, [token, building]);
+  }, [token, building, navigate]);
 
   const fetchTables = async () => {
     const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
@@ -43,11 +45,6 @@ function Dashboard({ token, username, tables, reservations, setReservations }) {
     } catch (error) {
       console.error("Error:", error);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate(`/${building}/login`);
   };
 
   return (
