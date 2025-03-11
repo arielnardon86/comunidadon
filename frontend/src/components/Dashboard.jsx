@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Schedule from "./Schedule";
 import ClubInfo from "./ClubInfo";
-import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 function Dashboard({ token, username, tables, reservations, setReservations }) {
   const { building } = useParams();
@@ -52,16 +51,16 @@ function Dashboard({ token, username, tables, reservations, setReservations }) {
   };
 
   return (
-    <div className="container mx-auto p-4 relative">
+    <div className="container mx-auto p-4 relative dashboard-container">
       {/* Botón de cerrar sesión en la esquina superior derecha */}
-      <div className="absolute top-0 right-0 mt-4 mr-4 sm:mr-2 sm:mt-2">
-  <button
-    onClick={handleLogout}
-    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm sm:text-base"
-  >
-    Cerrar Sesión
-  </button>
-</div>
+      <div className="absolute top-0 right-0 mt-4 mr-4">
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Cerrar Sesión
+        </button>
+      </div>
 
       {/* Título y contenido principal */}
       <div>
@@ -73,7 +72,7 @@ function Dashboard({ token, username, tables, reservations, setReservations }) {
           token={token}
           username={username}
         />
-        <div className="mt-8">
+        <div className="mt-4">
           <ClubInfo token={token} username={username} />
         </div>
       </div>

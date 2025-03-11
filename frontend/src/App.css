@@ -2,7 +2,7 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  /* text-align: center; /* Comentamos o eliminamos esta línea para evitar centrado global */
 }
 
 .logo {
@@ -40,7 +40,19 @@
 .read-the-docs {
   color: #888;
 }
-/* App.css */
-* {
-  border: 1px solid red; /* Para ver los contenedores en la pantalla */
+
+@media (max-width: 640px) {
+  .container {
+    padding: 8px; /* Reducir padding en pantallas pequeñas */
+  }
+
+  /* Asegurar que el centrado no afecte componentes específicos */
+  #root {
+    padding: 1rem; /* Reducir padding general en pantallas pequeñas */
+  }
+}
+
+/* Estilo opcional para anular centrado en Dashboard si es necesario */
+.dashboard-container {
+  text-align: left; /* Restaurar alineación izquierda para el título */
 }

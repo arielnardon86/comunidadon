@@ -3,9 +3,10 @@ import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";
+import "../styles/Schedule.css"; // Importar el nuevo archivo CSS
 
 function Schedule({ tables, reservations, setReservations, token, username }) {
-  const { building } = useParams(); // Obtener el edificio desde la URL
+  const { building } = useParams();
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -218,13 +219,13 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
         </div>
       )}
 
-      <p>
+      <p className="info-text">
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
         día en el que querés realizar tu reserva y luego seleccioná la mesa y
         el turno haciendo click y listo!
       </p>
       {username === "admin" && (
-        <p style={{ color: "#666", marginTop: "5px" }}>
+        <p className="info-text admin">
           <FontAwesomeIcon icon={faCircleInfo} /> Como administrador, puedes
           cancelar reservas! Para hacerlo, haz click en la reserva que desas
           cancelar.
@@ -232,108 +233,86 @@ function Schedule({ tables, reservations, setReservations, token, username }) {
       )}
       <div style={{ maxWidth: "600px", margin: "0 auto" }}>
         {tables.length === 0 ? (
-          <p
-            style={{
-              color: "#ff4444",
-              fontSize: "1.2em",
-              fontWeight: "bold",
-              animation: "blink 1.5s infinite",
-            }}
-          >
+          <p className="loading-message">
             Cargando calendario de reservas...
           </p>
         ) : (
-          <table
-            border="1"
-            className="calendar-table"
-            style={{ width: "100%", boxSizing: "border-box" }}
-          >
-            <thead>
-              <tr>
-                <th>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={handleDateChange}
-                    disabled={isLoading}
-                  />
-                </th>
-                <th>Mediodía</th>
-                <th>Noche</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tables.map((table) => {
-                const filteredReservations = reservations.filter(
-                  (res) => res.date === selectedDate
-                );
-                return (
-                  <tr key={table.id}>
-                    <td>{table.name}</td>
-                    {["mediodía", "noche"].map((turno) => {
-                      const reservation = filteredReservations.find(
-                        (res) => res.tableId === table.id && res.turno === turno
-                      );
-                      const isReserved = !!reservation;
-                      console.log("Checking reservation:", {
-                        tableId: table.id,
-                        turno,
-                        date: selectedDate,
-                        isReserved,
-                        reservedBy: reservation?.username,
-                      });
+          <div className="calendar-container">
+            <table className="calendar-table">
+              <thead>
+                <tr>
+                  <th>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={handleDateChange}
+                      disabled={isLoading}
+                    />
+                  </th>
+                  <th>Mediodía</th>
+                  <th>Noche</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tables.map((table) => {
+                  const filteredReservations = reservations.filter(
+                    (res) => res.date === selectedDate
+                  );
+                  return (
+                    <tr key={table.id}>
+                      <td>{table.name}</td>
+                      {["mediodía", "noche"].map((turno) => {
+                        const reservation = filteredReservations.find(
+                          (res) => res.tableId === table.id && res.turno === turno
+                        );
+                        const isReserved = !!reservation;
+                        console.log("Checking reservation:", {
+                          tableId: table.id,
+                          turno,
+                          date: selectedDate,
+                          isReserved,
+                          reservedBy: reservation?.username,
+                        });
 
-                      return (
-                        <td
-                          key={turno}
-                          style={{
-                            backgroundColor: isReserved ? "red" : "green",
-                            color: "white",
-                            cursor: isLoading
-                              ? "not-allowed"
-                              : isReserved && username === "admin"
-                              ? "pointer"
-                              : isReserved
-                              ? "not-allowed"
-                              : "pointer",
-                            opacity: isLoading ? 0.5 : 1,
-                            fontSize: "0.9em",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                          title={
-                            isReserved && username === "admin"
-                              ? `Reservado por: ${reservation.username}`
-                              : ""
-                          }
-                          onClick={() => {
-                            if (isLoading) return;
-                            if (isReserved && username === "admin") {
-                              handleCancelReservation(reservation.id);
-                            } else if (!isReserved) {
-                              handleReservationClick(table.id, turno);
+                        return (
+                          <td
+                            key={turno}
+                            className={`${isReserved ? "reserved" : "available"} ${
+                              isReserved && username === "admin" ? "admin" : ""
+                            } ${isLoading ? "disabled" : ""}`}
+                            title={
+                              isReserved && username === "admin"
+                                ? `Reservado por: ${reservation.username}`
+                                : ""
                             }
-                          }}
-                        >
-                          {isReserved
-                            ? username === "admin"
-                              ? `🟥 Reservado por: ${reservation.username}`
-                              : "🟥 Reservado"
-                            : "🟩 Disponible"}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                            onClick={() => {
+                              if (isLoading) return;
+                              if (isReserved && username === "admin") {
+                                handleCancelReservation(reservation.id);
+                              } else if (!isReserved) {
+                                handleReservationClick(table.id, turno);
+                              }
+                            }}
+                          >
+                            {isReserved
+                              ? username === "admin"
+                                ? `Reservado por: ${reservation.username}`
+                                : "Reservado"
+                              : "Disponible"}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
         {username === "admin" && (
           <div
             style={{
-              marginTop: "20px",
+              marginTop: "10px",
               padding: "20px",
               border: "1px solid #ccc",
               borderRadius: "5px",
