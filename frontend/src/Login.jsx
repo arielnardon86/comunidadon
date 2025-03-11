@@ -5,8 +5,8 @@ import "./styles/Login.css"; // Importa el archivo CSS
 
 // Objeto de mapeo para las imágenes de fondo
 const backgroundImages = {
-  vow: "/src/assets/backgrounds/vow-background.jpg",
-  "edificio-x": "/src/assets/backgrounds/edificio-x-portada.jpg",
+  vow: "/public/assets/backgrounds/vow-background.jpg",
+  "edificio-x": "/public/assets/backgrounds/edificio.jpg",
   // Agrega más edificios aquí según sea necesario
 };
 
