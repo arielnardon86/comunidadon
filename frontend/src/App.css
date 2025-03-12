@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 0; /* Eliminamos el padding para evitar que reduzca el espacio disponible */
   box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+  width: 100%; /* Asegurar que ocupe el 100% del ancho por defecto */
 }
 
 /* Estilo para el logo (sin cambios) */
@@ -47,12 +48,21 @@
 /* Media query para pantallas pequeñas */
 @media (max-width: 640px) {
   #root {
-    padding: 0; /* Mantenemos padding en 0 para evitar conflictos */
+    margin: 0; /* Eliminar centrado en pantallas pequeñas */
+    padding: 0;
+    width: 100vw; /* Forzar el ancho completo de la pantalla */
+  }
+
+  .dashboard-container {
+    max-width: none !important; /* Eliminar la restricción de ancho en pantallas pequeñas */
+    width: 100vw; /* Asegurar que ocupe el ancho completo */
+    margin: 0;
+    padding: 0;
   }
 }
 
 /* Estilo opcional para anular centrado en Dashboard */
 .dashboard-container {
   text-align: left; /* Restaurar alineación izquierda para el título */
-  max-width: 800px !important; /* Forzar el ancho a 800px para consistencia */
+  max-width: 800px !important; /* Forzar el ancho a 800px para consistencia en pantallas grandes */
 }

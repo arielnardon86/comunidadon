@@ -198,7 +198,7 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", width: "100%", margin: 0, padding: 0 }}>
       {isLoading && (
         <div
           style={{
@@ -281,7 +281,6 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
                         return (
                           <td
                             key={turno}
-                            style={{ textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                             className={`${isReserved ? "reserved" : "available"} ${
                               isReserved && username === "admin" ? "admin" : ""
                             } ${isLoading ? "disabled" : ""}`}
@@ -301,11 +300,7 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
                           >
                             {isReserved
                               ? username === "admin"
-                                ? window.innerWidth <= 640
-                                  ? reservation.username.length > 5
-                                    ? `${reservation.username.slice(0, 5)}...`
-                                    : reservation.username
-                                  : `Reservado por: ${reservation.username}`
+                                ? `Reservado por: ${reservation.username}`
                                 : "Reservado"
                               : "Disponible"}
                           </td>

@@ -44,20 +44,6 @@ button:focus-visible {
 }
 
 /* Diseño del calendario */
-.calendar-table {
-  border-radius: 10px;
-  overflow: hidden;
-  border-collapse: separate;
-  width: 70%;
-  margin: 10px auto; /* Reducido el margen */
-}
-
-.calendar-table th,
-.calendar-table td {
-  border: 1px solid #e0e0e0; /* Agrega bordes gris claro */
-  padding: 3px; /* Reducido el relleno */
-  font-size: 18px;
-}
 
 select option {
   background-color: #fAfAfA;

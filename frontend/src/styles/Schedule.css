@@ -16,18 +16,26 @@
   }
   
   .calendar-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 auto;
+    width: 100%; /* Por defecto para pantallas grandes */
+    border-collapse: collapse; /* Cambiado de separate a collapse para consistencia */
+    border-radius: 10px; /* Mover desde index.css */
+    overflow: hidden; /* Mover desde index.css */
+    margin: 0 auto; /* Ajustado para pantallas grandes */
+    table-layout: fixed;
+    box-sizing: border-box;
   }
   
   .calendar-table th,
   .calendar-table td {
-    border: 1px solid #ddd;
-    padding: 8px 1px;
+    border: 1px solid #e0e0e0; /* Mover desde index.css */
+    padding: 8px 1px; /* Ajustado para mejor legibilidad */
     text-align: center;
     box-sizing: border-box;
     vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px; /* Mover desde index.css */
   }
   
   .calendar-table th {
@@ -72,6 +80,7 @@
       max-width: none;
       width: 100vw;
       margin: 0;
+      padding: 0;
     }
   
     .calendar-container {
@@ -85,39 +94,43 @@
     }
   
     .calendar-table {
-      width: 100%; /* Asegurar que la tabla ocupe el 100% del contenedor */
-      min-width: 0; /* Eliminar cualquier restricción de ancho mínimo */
-      table-layout: fixed; /* Forzar que las columnas se ajusten al ancho del contenedor */
+      width: 100vw; /* Forzar el ancho completo */
+      min-width: 0;
+      margin: 0; /* Eliminar el margin auto */
+      table-layout: fixed;
+      box-sizing: border-box;
+      border-collapse: collapse;
     }
   
     .calendar-table th,
     .calendar-table td {
-      width: 33.33%; /* Distribuir las columnas equitativamente (3 columnas = 33.33% cada una) */
-      padding: 4px 0.5px;
-      font-size: 0.6rem;
-      min-width: 0; /* Eliminar min-width para que las columnas se ajusten */
-      white-space: nowrap;
+      width: 33.33%;
+      padding: 4px 2px;
+      font-size: 0.7rem;
+      min-width: 0;
+      text-align: center;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
   
     .calendar-table th:first-child,
     .calendar-table td:first-child {
-      width: 33.33%; /* Asegurar que la primera columna también tenga el mismo ancho */
+      width: 33.33%;
     }
   
     .calendar-table th:nth-child(2),
     .calendar-table td:nth-child(2),
     .calendar-table th:nth-child(3),
     .calendar-table td:nth-child(3) {
-      width: 33.33%; /* Mantener distribución equitativa */
+      width: 33.33%;
     }
   
     .calendar-table th input[type="date"] {
       width: 100%;
       box-sizing: border-box;
       padding: 2px;
-      font-size: 0.6rem;
+      font-size: 0.7rem;
     }
   }
   
@@ -126,6 +139,7 @@
     .calendar-wrapper {
       width: 100vw;
       margin: 0;
+      padding: 0;
     }
   
     .calendar-container {
@@ -136,13 +150,13 @@
   
     .calendar-table th,
     .calendar-table td {
-      padding: 3px 0.25px;
-      font-size: 0.55rem;
-      width: 33.33%; /* Mantener distribución equitativa */
+      padding: 3px 1px;
+      font-size: 0.65rem;
+      width: 33.33%;
     }
   
     .calendar-table th input[type="date"] {
-      font-size: 0.55rem;
+      font-size: 0.65rem;
       padding: 1px;
     }
   }
