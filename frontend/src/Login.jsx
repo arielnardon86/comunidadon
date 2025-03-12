@@ -1,17 +1,14 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
-import "./styles/Login.css"; // Importa el archivo CSS
+import "./styles/Login.css";
+import vowBackground from "./assets/backgrounds/vow-background.jpg"; 
 
-// Objeto de mapeo para las imágenes de fondo (corregir rutas)
+
 const backgroundImages = {
-  vow: "/assets/backgrounds/vow-background.jpg", // Quitar /public
-  "edificio-x": "/assets/backgrounds/edificio.jpg", // Quitar /public
-  // Agrega más edificios aquí según sea necesario
+  vow: vowBackground,
+  
 };
-
-// Si prefieres mantener default-portada.jpg en src/assets, impórtalo
-import defaultBackground from "../../assets/backgrounds/default-portada.jpg"; // Ajusta la ruta según la estructura
 
 function Login({ setToken }) {
   const [username, setUsername] = useState("");
@@ -60,9 +57,7 @@ function Login({ setToken }) {
     }
   };
 
-  // Determinar la imagen de fondo según el edificio
-  const backgroundImage =
-    backgroundImages[building] || defaultBackground; // Usar la imagen importada como fallback
+  const backgroundImage = backgroundImages[building] || defaultBackground;
 
   return (
     <div
