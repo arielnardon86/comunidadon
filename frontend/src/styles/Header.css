@@ -26,7 +26,7 @@
     align-items: center;
     gap: 10px;
     position: relative;
-    left: calc(50% - 150px); /* Reducir de 70% a 50% (20% menos), ajustado por el ancho */
+    left: calc(50% - 150px);
     transform: translateX(-50%);
   }
   
@@ -63,7 +63,7 @@
     .header-user {
       flex-direction: row;
       gap: 5px;
-      left: calc(50% - 120px); /* Reducir de 70% a 50% (20% menos), ajustado por el ancho */
+      left: calc(75% - 120px); /* Mover más a la derecha (de 50% a 75%) */
       transform: translateX(-50%);
     }
   
