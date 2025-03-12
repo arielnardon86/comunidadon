@@ -1,9 +1,22 @@
+/* Resetear márgenes y padding globales */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Forzar el ancho completo del contenedor raíz */
 #root {
-  /* max-width: 1280px; /* Comentamos para delegar el control a componentes hijos */
-  margin: 0 auto;
-  padding: 0; /* Eliminamos el padding para evitar que reduzca el espacio disponible */
-  box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
-  width: 100%; /* Asegurar que ocupe el 100% del ancho por defecto */
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  max-width: none;
 }
 
 /* Estilo para el logo (sin cambios) */
@@ -48,21 +61,41 @@
 /* Media query para pantallas pequeñas */
 @media (max-width: 640px) {
   #root {
-    margin: 0; /* Eliminar centrado en pantallas pequeñas */
+    margin: 0;
     padding: 0;
-    width: 100vw; /* Forzar el ancho completo de la pantalla */
+    width: 100vw;
+    max-width: none;
   }
 
   .dashboard-container {
-    max-width: none !important; /* Eliminar la restricción de ancho en pantallas pequeñas */
-    width: 100vw; /* Asegurar que ocupe el ancho completo */
+    max-width: none !important;
+    width: 100vw;
     margin: 0;
     padding: 0;
   }
+
+  .content {
+    padding-top: 15px;
+  }
 }
 
-/* Estilo opcional para anular centrado en Dashboard */
-.dashboard-container {
-  text-align: left; /* Restaurar alineación izquierda para el título */
-  max-width: 800px !important; /* Forzar el ancho a 800px para consistencia en pantallas grandes */
+/* Estilo para pantallas de escritorio (mayores a 640px) */
+@media (min-width: 641px) {
+  .dashboard-container {
+    max-width: 800px !important;
+    margin-left: 0; /* Resetear márgenes */
+    margin-right: 0;
+    padding-left: 50px; /* Mover un poco más a la derecha con padding */
+    text-align: left; /* Mantener texto alineado a la izquierda */
+  }
+
+  .content {
+    padding-top: 20px;
+    text-align: left;
+  }
+}
+
+/* Ajuste para el contenido debajo del header */
+.content {
+  padding-top: 20px;
 }

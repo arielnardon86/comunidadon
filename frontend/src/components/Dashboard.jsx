@@ -1,86 +1,69 @@
-import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import Schedule from "./Schedule";
-import ClubInfo from "./ClubInfo";
+import ClubInfo from "./ClubInfo"; // Importar el nuevo componente
 
-function Dashboard({ token, username, tables, reservations, setReservations, setToken, handleLogout }) {
-  const { building } = useParams();
-  const [localTables, setLocalTables] = useState(tables);
-  const [localReservations, setLocalReservations] = useState(reservations);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (token) {
-      fetchTables();
-      fetchReservations();
-    } else {
-      navigate(`/${building}/login`, { replace: true });
-    }
-  }, [token, building, navigate]);
+function Dashboard({
+  token,
+  username,
+  reservations,
+  setReservations,
+  setToken,
+  handleLogout,
+}) {
+  const [selectedBuilding, setSelectedBuilding] = useState("vow");
+  const [tables, setTables] = useState([]); // Definir estado local para tables
 
   useEffect(() => {
-    setLocalReservations(reservations);
-  }, [reservations]);
+    const fetchTables = async () => {
+      try {
+        const response = await fetch(
+          `https://comunidadon-backend.onrender.com/${selectedBuilding}/api/tables`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) throw new Error("Error fetching tables");
+        const data = await response.json();
+        setTables(data); // Usar setTables definido localmente
+      } catch (error) {
+        console.error("Error fetching tables:", error);
+      }
+    };
 
-  const fetchTables = async () => {
-    const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
-    try {
-      const response = await fetch(`${apiUrl}/${building}/api/tables`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Error fetching tables");
-      const data = await response.json();
-      setLocalTables(data);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+    const fetchReservations = async () => {
+      try {
+        const response = await fetch(
+          `https://comunidadon-backend.onrender.com/${selectedBuilding}/api/reservations`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) throw new Error("Error fetching reservations");
+        const data = await response.json();
+        setReservations(data); // Usar setReservations recibido como prop
+      } catch (error) {
+        console.error("Error fetching reservations:", error);
+      }
+    };
 
-  const fetchReservations = async () => {
-    const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
-    try {
-      const response = await fetch(`${apiUrl}/${building}/api/reservations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Error fetching reservations");
-      const data = await response.json();
-      setLocalReservations(data);
-      setReservations(data);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+    fetchTables();
+    fetchReservations();
+  }, [selectedBuilding, token, setReservations]);
 
   return (
-    <div className="relative dashboard-container" style={{ maxWidth: "800px", margin: "0 auto", padding: "0 1rem" }}>
-      <div className="absolute top-0 right-0 mt-4 mr-4">
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Cerrar Sesión
-        </button>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold mb-6">Realiza tu reserva</h2>
-        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-          <Schedule
-            key={Date.now()}
-            tables={localTables}
-            reservations={localReservations}
-            setReservations={setLocalReservations}
-            token={token}
-            username={username}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-          />
-        </div>
-        <div style={{ maxWidth: "800px", margin: "0 auto" }} className="mt-4">
-          <ClubInfo token={token} username={username} />
-        </div>
+    <div className="dashboard-container">
+      <div className="content">
+        <h1>Reservas - {selectedBuilding.toUpperCase()}</h1>
+        <Schedule
+          tables={tables}
+          reservations={reservations}
+          setReservations={setReservations}
+          token={token}
+          username={username}
+          selectedDate={new Date().toISOString().split("T")[0]} // Fecha por defecto
+          setSelectedDate={(date) => console.log("Date changed:", date)} // Placeholder
+        />
+        <ClubInfo building={selectedBuilding} /> {/* Mover ClubInfo aquí debajo */}
       </div>
     </div>
   );

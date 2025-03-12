@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login";
 import Dashboard from "./components/Dashboard";
-import './App.css';
-import Swal from "sweetalert2"; // Asegúrate de importar Swal si no está instalado
+import Header from "./components/Header"; // Importamos el nuevo componente
+import "./App.css";
+import Swal from "sweetalert2";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -32,8 +33,8 @@ function App() {
       icon: "success",
       title: "Sesión cerrada",
       text: "¡Hasta pronto!",
-      timer: 1500, // Muestra el mensaje durante 1.5 segundos
-      showConfirmButton: false, // Sin botón de confirmación
+      timer: 1500,
+      showConfirmButton: false,
     }).then(() => {
       localStorage.removeItem("token");
       setToken(null);
@@ -42,42 +43,57 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          token ? <Navigate to="/vow" replace /> : <Navigate to="/vow/login" replace />
-        }
-      />
-      <Route
-        path="/:building/login"
-        element={
-          token ? (
-            <Navigate to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}`} replace />
-          ) : (
-            <Login setToken={setToken} />
-          )
-        }
-      />
-      <Route
-        path="/:building"
-        element={
-          token ? (
-            <Dashboard
-              token={token}
-              username={username}
-              tables={tables}
-              reservations={reservations}
-              setReservations={setReservations}
-              setToken={setToken}
-              handleLogout={handleLogout}
-            />
-          ) : (
-            <Navigate to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}/login`} replace />
-          )
-        }
-      />
-    </Routes>
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            token ? (
+              <Navigate to="/vow" replace />
+            ) : (
+              <Navigate to="/vow/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/:building/login"
+          element={
+            token ? (
+              <Navigate
+                to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}`}
+                replace
+              />
+            ) : (
+              <Login setToken={setToken} />
+            )
+          }
+        />
+        <Route
+          path="/:building"
+          element={
+            token ? (
+              <>
+                <Header username={username} handleLogout={handleLogout} />
+                <Dashboard
+                  token={token}
+                  username={username}
+                  tables={tables}
+                  reservations={reservations}
+                  setReservations={setReservations}
+                  setToken={setToken}
+                  handleLogout={handleLogout}
+                />
+              </>
+            ) : (
+              <Navigate
+                to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}/login`}
+                replace
+              />
+            )
+          }
+        />
+      </Routes>
+    </>
   );
 }
 
