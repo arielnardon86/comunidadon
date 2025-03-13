@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Routes, Navigate, useParams } from "react-router-dom"; // Añadir useParams
+import { Route, Routes, Navigate, useParams } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Login from "./Login";
@@ -37,7 +37,10 @@ function App() {
     <div className="App">
       <Routes>
         {/* Rutas públicas */}
-        <Route path="/:building/login" element={<Login setToken={handleLogin} />} />
+        <Route
+          path="/:building/login"
+          element={<Login setToken={setToken} setUsername={setUsername} />}
+        />
 
         {/* Rutas protegidas */}
         <Route

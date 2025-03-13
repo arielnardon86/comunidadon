@@ -16,8 +16,8 @@ const buildingRoutes = {
   "torre-x": "/torre-x",
 };
 
-function Login({ setToken, setUsername }) { // Añadimos setUsername como prop
-  const [username, setUsernameInput] = useState(""); // Cambiamos a setUsernameInput para evitar confusión
+function Login({ setToken, setUsername }) {
+  const [usernameInput, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { building } = useParams();
@@ -25,15 +25,14 @@ function Login({ setToken, setUsername }) { // Añadimos setUsername como prop
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
-  // Depuración
   console.log("API URL:", apiUrl);
   console.log("Building from useParams:", building);
+  console.log("Full login URL:", `${apiUrl}/${building}/api/login`);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validar building
     if (!building || !["vow", "torre-x"].includes(building)) {
       console.error("Building no válido:", building);
       Swal.fire({
@@ -51,19 +50,21 @@ function Login({ setToken, setUsername }) { // Añadimos setUsername como prop
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: username, password }),
+        body: JSON.stringify({ username: usernameInput, password }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al iniciar sesión");
+        const errorData = await response.json().catch(() => ({
+          error: "Respuesta no válida del servidor",
+        }));
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
-      setToken(data.token); // Actualiza solo el token
-      setUsername(username); // Actualiza el username
+      setToken(data.token); // Usar setToken como prop
+      setUsername(usernameInput); // Usar setUsername como prop
       localStorage.setItem("token", data.token);
-      localStorage.setItem("username", username);
+      localStorage.setItem("username", usernameInput);
 
       const destinationRoute = buildingRoutes[building] || "/vow";
       navigate(destinationRoute);
@@ -90,18 +91,16 @@ function Login({ setToken, setUsername }) { // Añadimos setUsername como prop
   return (
     <div
       className="login-container"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-      }}
+      style={{ backgroundImage: `url(${backgroundImage})` }}
     >
       <div className="login-box">
-        <h2>Iniciar Sesión - {building.replace('-', ' ').toUpperCase()}</h2>
+        <h2>Iniciar Sesión - {building.replace("-", " ").toUpperCase()}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>Usuario:</label>
             <input
               type="text"
-              value={username}
+              value={usernameInput}
               onChange={(e) => setUsernameInput(e.target.value)}
               required
               disabled={isLoading}
