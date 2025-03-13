@@ -1,33 +1,99 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
-import { useParams } from "react-router-dom";
 import "../styles/Schedule.css";
 
-function Schedule({ tables, reservations, setReservations, token, username, selectedDate, setSelectedDate }) {
-  const { building } = useParams();
+function Schedule({
+  tables,
+  reservations,
+  setReservations,
+  token,
+  username,
+  selectedBuilding,
+  selectedDate,
+  setSelectedDate,
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  console.log("selectedBuilding en Schedule:", selectedBuilding);
+  console.log("token en Schedule:", token); // Depuración
+  console.log("tables en Schedule:", tables); // Depuración
+
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
+
+  // Recargar reservas cuando cambia la fecha seleccionada
+  useEffect(() => {
+    console.log("Ejecutando useEffect para recargar reservas..."); // Depuración
+    console.log("selectedDate:", selectedDate);
+    console.log("selectedBuilding:", selectedBuilding);
+    console.log("token:", token);
+
+    const fetchReservations = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `${apiUrl}/${selectedBuilding}/api/reservations`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${await response.text()}`);
+        }
+        const updatedReservations = await response.json();
+        setReservations(updatedReservations);
+        console.log("Reservas recargadas para fecha", selectedDate, ":", updatedReservations);
+      } catch (error) {
+        console.error("Error al recargar reservas:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudieron cargar las reservas. Intenta de nuevo.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (selectedBuilding && token) {
+      fetchReservations();
+    } else {
+      console.warn("No se ejecutó fetchReservations porque selectedBuilding o token no están definidos");
+    }
+  }, [selectedDate, selectedBuilding, token, setReservations, apiUrl]);
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
+    console.log("Fecha seleccionada:", event.target.value);
   };
 
   const handleReservationClick = async (tableId, turno) => {
+    if (!selectedBuilding) {
+      console.error("selectedBuilding es undefined en handleReservationClick");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo determinar el edificio. Contacta al administrador.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/${building}/api/reservations`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ tableId, turno, date: selectedDate }),
-      });
+      const response = await fetch(
+        `${apiUrl}/${selectedBuilding}/api/reservations`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ tableId, turno, date: selectedDate }),
+        }
+      );
 
       if (!response.ok) {
         let errorMessage = "No se pudo realizar la reserva";
@@ -41,11 +107,14 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
       }
 
       const fetchUpdatedReservations = async () => {
-        const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const reservationsRes = await fetch(
+          `${apiUrl}/${selectedBuilding}/api/reservations`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!reservationsRes.ok) {
-          throw new Error("Error al recargar reservas");
+          throw new Error(`Error ${reservationsRes.status}: ${await reservationsRes.text()}`);
         }
         const updatedReservations = await reservationsRes.json();
         setReservations(updatedReservations);
@@ -53,9 +122,6 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
       };
 
       await fetchUpdatedReservations();
-      setTimeout(async () => {
-        await fetchUpdatedReservations();
-      }, 1000);
 
       Swal.fire({
         icon: "success",
@@ -64,30 +130,38 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
       });
     } catch (error) {
       console.error("Error al reservar:", error);
-      const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (reservationsRes.ok) {
-        const updatedReservations = await response.json();
-        setReservations(updatedReservations);
-        console.log("Reservas recargadas después de error:", updatedReservations);
-        const isAlreadyReserved = updatedReservations.some(
-          (res) =>
-            res.tableId === tableId &&
-            res.turno === turno &&
-            res.date === selectedDate
-        );
-        if (isAlreadyReserved) {
-          setReservations([...updatedReservations]);
-        }
-      } else {
-        console.error("Error al recargar reservas después de error:", reservationsRes.status);
-      }
       Swal.fire({
         icon: "error",
         title: "Error en el servidor",
         text: error.message,
       });
+
+      try {
+        const reservationsRes = await fetch(
+          `${apiUrl}/${selectedBuilding}/api/reservations`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (reservationsRes.ok) {
+          const updatedReservations = await reservationsRes.json();
+          setReservations(updatedReservations);
+          console.log("Reservas recargadas después de error:", updatedReservations);
+          const isAlreadyReserved = updatedReservations.some(
+            (res) =>
+              res.tableId === tableId &&
+              res.turno === turno &&
+              res.date === selectedDate
+          );
+          if (isAlreadyReserved) {
+            setReservations([...updatedReservations]);
+          }
+        } else {
+          console.error("Error al recargar reservas después de error:", reservationsRes.status);
+        }
+      } catch (refreshError) {
+        console.error("Error al recargar reservas después de error:", refreshError.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -111,21 +185,27 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/${building}/api/reservations/${reservationId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${apiUrl}/${selectedBuilding}/api/reservations/${reservationId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Error al cancelar la reserva");
       }
 
-      const reservationsRes = await fetch(`${apiUrl}/${building}/api/reservations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const reservationsRes = await fetch(
+        `${apiUrl}/${selectedBuilding}/api/reservations`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (!reservationsRes.ok) {
         throw new Error("Error al recargar reservas");
       }
@@ -163,14 +243,17 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/${building}/api/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username: newUsername, password: newPassword }),
-      });
+      const response = await fetch(
+        `${apiUrl}/${selectedBuilding}/api/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username: newUsername, password: newPassword }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -260,8 +343,9 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
               <tbody>
                 {tables.map((table) => {
                   const filteredReservations = reservations.filter(
-                    (res) => res.date === selectedDate
+                    (res) => new Date(res.date).toISOString().split("T")[0] === selectedDate
                   );
+                  console.log("Filtered reservations para fecha", selectedDate, ":", filteredReservations);
                   return (
                     <tr key={table.id}>
                       <td>{table.name}</td>
@@ -315,7 +399,6 @@ function Schedule({ tables, reservations, setReservations, token, username, sele
         )}
       </div>
 
-      {/* Mover el formulario de registro a un contenedor separado */}
       {username === "admin" && (
         <div
           style={{

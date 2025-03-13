@@ -1,20 +1,27 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./styles/Login.css";
-import vowBackground from "./assets/backgrounds/vow-background.jpg"; 
-
+import vowBackground from "./assets/backgrounds/vow-background.jpg";
+import torreBackground from "./assets/backgrounds/torre-x-background.jpg";
+import defaultBackground from "./assets/backgrounds/default-portada.jpg";
 
 const backgroundImages = {
   vow: vowBackground,
-  
+  "torre-x": torreBackground,
 };
 
-function Login({ setToken }) {
+const buildingRoutes = {
+  vow: "/vow",
+  "torre-x": "/torre-x",
+};
+
+function Login({ setToken }) { // Ahora setToken es handleLogin
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { building } = useParams();
+  const navigate = useNavigate();
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
@@ -37,8 +44,10 @@ function Login({ setToken }) {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token);
-      setToken(data.token);
+      setToken(data.token, username); // Usar handleLogin para actualizar token y username
+
+      const destinationRoute = buildingRoutes[building] || "/vow";
+      navigate(destinationRoute);
 
       Swal.fire({
         icon: "success",
@@ -67,7 +76,7 @@ function Login({ setToken }) {
       }}
     >
       <div className="login-box">
-        <h2>Iniciar Sesión - {building.toUpperCase()}</h2>
+        <h2>Iniciar Sesión - {building.replace('-', ' ').toUpperCase()}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>Usuario:</label>

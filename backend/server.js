@@ -60,7 +60,6 @@ const dbConfigs = {
     requestTimeout: 30000,
     connectionTimeout: 30000,
   },
-  // Agrega más edificios aquí según sea necesario
 };
 
 // Validar configuraciones de bases de datos
@@ -129,12 +128,21 @@ app.use((err, req, res, next) => {
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
+// Mapeo de nombres de edificios desde la URL a las claves en dbConfigs
+const buildingMap = {
+  "vow": "vow",
+  "torre-x": "Torre_x", // Mapea "torre-x" (URL) a "Torre_x" (clave en dbConfigs)
+};
+
 // Middleware para determinar el edificio desde la URL
 app.use((req, res, next) => {
-  const building = req.path.split("/")[1]; // Ejemplo: "/vow/api/tables" -> "vow"
+  const buildingFromUrl = req.path.split("/")[1]; // Ejemplo: "/torre-x/api/login" -> "torre-x"
+  const building = buildingMap[buildingFromUrl]; // Mapear el nombre de la URL a la clave en dbConfigs
+
   if (!building || !dbConfigs[building]) {
     return res.status(404).json({ error: "Edificio no encontrado" });
   }
+
   req.building = building;
   next();
 });

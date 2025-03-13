@@ -1,83 +1,54 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./Login";
+import { Route, Routes, Navigate, useParams } from "react-router-dom"; // Añadir useParams
+import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
-import Header from "./components/Header"; // Importamos el nuevo componente
+import Login from "./Login";
 import "./App.css";
-import Swal from "sweetalert2";
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [username, setUsername] = useState("");
-  const [tables, setTables] = useState([]);
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [username, setUsername] = useState(localStorage.getItem("username") || "");
   const [reservations, setReservations] = useState([]);
 
+  const handleLogin = (newToken, newUsername) => {
+    setToken(newToken);
+    setUsername(newUsername);
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("username", newUsername);
+  };
+
   useEffect(() => {
-    if (token) {
-      try {
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        setUsername(decodedToken.username);
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        setToken(null);
-        localStorage.removeItem("token");
-      }
-    } else {
+    if (!token) {
       setUsername("");
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
     }
   }, [token]);
 
-  // Función para cerrar sesión con mensaje de despedida
   const handleLogout = () => {
-    Swal.fire({
-      icon: "success",
-      title: "Sesión cerrada",
-      text: "¡Hasta pronto!",
-      timer: 1500,
-      showConfirmButton: false,
-    }).then(() => {
-      localStorage.removeItem("token");
-      setToken(null);
-      setUsername("");
-    });
+    setToken("");
+    setUsername("");
+    setReservations([]);
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
   };
 
   return (
-    <>
+    <div className="App">
       <Routes>
+        {/* Rutas públicas */}
+        <Route path="/:building/login" element={<Login setToken={handleLogin} />} />
+
+        {/* Rutas protegidas */}
         <Route
-          path="/"
-          element={
-            token ? (
-              <Navigate to="/vow" replace />
-            ) : (
-              <Navigate to="/vow/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/:building/login"
-          element={
-            token ? (
-              <Navigate
-                to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}`}
-                replace
-              />
-            ) : (
-              <Login setToken={setToken} />
-            )
-          }
-        />
-        <Route
-          path="/:building"
+          path="/vow"
           element={
             token ? (
               <>
-                <Header username={username} handleLogout={handleLogout} />
+                <Header username={username} handleLogout={handleLogout} building="vow" />
                 <Dashboard
                   token={token}
                   username={username}
-                  tables={tables}
                   reservations={reservations}
                   setReservations={setReservations}
                   setToken={setToken}
@@ -85,15 +56,36 @@ function App() {
                 />
               </>
             ) : (
-              <Navigate
-                to={`/${token ? JSON.parse(atob(token.split(".")[1])).building : "vow"}/login`}
-                replace
-              />
+              <Navigate to="/vow/login" />
             )
           }
         />
+        <Route
+          path="/torre-x"
+          element={
+            token ? (
+              <>
+                <Header username={username} handleLogout={handleLogout} building="torre-x" />
+                <Dashboard
+                  token={token}
+                  username={username}
+                  reservations={reservations}
+                  setReservations={setReservations}
+                  setToken={setToken}
+                  handleLogout={handleLogout}
+                />
+              </>
+            ) : (
+              <Navigate to="/torre-x/login" />
+            )
+          }
+        />
+
+        {/* Redirección por defecto */}
+        <Route path="/" element={<Navigate to="/vow/login" />} />
+        <Route path="*" element={<Navigate to="/vow/login" />} />
       </Routes>
-    </>
+    </div>
   );
 }
 

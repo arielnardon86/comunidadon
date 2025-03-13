@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useParams, Navigate } from "react-router-dom";
 import Schedule from "./Schedule";
-import ClubInfo from "./ClubInfo"; // Importar el nuevo componente
+import ClubInfo from "./ClubInfo";
 
 function Dashboard({
   token,
@@ -10,11 +11,22 @@ function Dashboard({
   setToken,
   handleLogout,
 }) {
-  const [selectedBuilding, setSelectedBuilding] = useState("vow");
-  const [tables, setTables] = useState([]); // Definir estado local para tables
+  const { building } = useParams();
+  console.log("Building desde useParams en Dashboard:", building);
+  console.log("Token recibido en Dashboard:", token);
+  const [selectedBuilding, setSelectedBuilding] = useState(building || "vow");
+  const [tables, setTables] = useState([]);
+  const [loadingTables, setLoadingTables] = useState(true);
+  const [loadingReservations, setLoadingReservations] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]); // Estado para la fecha
 
   useEffect(() => {
+    console.log("selectedBuilding en useEffect:", selectedBuilding);
+    console.log("token en useEffect:", token);
+
     const fetchTables = async () => {
+      setLoadingTables(true);
       try {
         const response = await fetch(
           `https://comunidadon-backend.onrender.com/${selectedBuilding}/api/tables`,
@@ -22,15 +34,23 @@ function Dashboard({
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (!response.ok) throw new Error("Error fetching tables");
+        if (!response.ok) {
+          throw new Error(`Error fetching tables: ${response.status} - ${await response.text()}`);
+        }
         const data = await response.json();
-        setTables(data); // Usar setTables definido localmente
+        setTables(data);
+        console.log("Tables cargadas:", data);
       } catch (error) {
         console.error("Error fetching tables:", error);
+        setError(error.message);
+        setTables([]);
+      } finally {
+        setLoadingTables(false);
       }
     };
 
     const fetchReservations = async () => {
+      setLoadingReservations(true);
       try {
         const response = await fetch(
           `https://comunidadon-backend.onrender.com/${selectedBuilding}/api/reservations`,
@@ -38,32 +58,66 @@ function Dashboard({
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (!response.ok) throw new Error("Error fetching reservations");
+        if (!response.ok) {
+          throw new Error(`Error fetching reservations: ${response.status} - ${await response.text()}`);
+        }
         const data = await response.json();
-        setReservations(data); // Usar setReservations recibido como prop
+        setReservations(data);
+        console.log("Reservations cargadas:", data);
       } catch (error) {
         console.error("Error fetching reservations:", error);
+        setReservations([]);
+      } finally {
+        setLoadingReservations(false);
       }
     };
 
-    fetchTables();
-    fetchReservations();
+    if (selectedBuilding && token) {
+      fetchTables();
+      fetchReservations();
+    } else {
+      console.warn("selectedBuilding o token no definidos:", { selectedBuilding, token });
+      setError("Token o edificio no definidos");
+    }
   }, [selectedBuilding, token, setReservations]);
+
+  if (!token) {
+    return <Navigate to={`/${selectedBuilding}/login`} />;
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-container">
+        <div className="content">
+          <h1>Error</h1>
+          <p>{error}</p>
+          <button onClick={handleLogout}>Cerrar sesión</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
       <div className="content">
-        <h1>Reservas - {selectedBuilding.toUpperCase()}</h1>
-        <Schedule
-          tables={tables}
-          reservations={reservations}
-          setReservations={setReservations}
-          token={token}
-          username={username}
-          selectedDate={new Date().toISOString().split("T")[0]} // Fecha por defecto
-          setSelectedDate={(date) => console.log("Date changed:", date)} // Placeholder
-        />
-        <ClubInfo building={selectedBuilding} /> {/* Mover ClubInfo aquí debajo */}
+        <h1>Reservas - {selectedBuilding.replace('-', ' ').toUpperCase()}</h1>
+        {loadingTables || loadingReservations ? (
+          <p>Cargando datos...</p>
+        ) : (
+          <>
+            <Schedule
+              tables={tables}
+              reservations={reservations}
+              setReservations={setReservations}
+              token={token}
+              username={username}
+              selectedBuilding={selectedBuilding}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
+            <ClubInfo building={selectedBuilding} token={token} />
+          </>
+        )}
       </div>
     </div>
   );

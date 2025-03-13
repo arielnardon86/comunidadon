@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Header.css";
 
-function Header({ username, handleLogout }) {
+function Header({ username, handleLogout, building }) {
   const navigate = useNavigate();
+
+  console.log("Username en Header:", username); // Depuración
 
   const handleLogoutClick = () => {
     Swal.fire({
@@ -15,14 +17,14 @@ function Header({ username, handleLogout }) {
       showConfirmButton: false,
     }).then(() => {
       handleLogout();
-      navigate("/vow/login");
+      navigate(`/${building}/login`);
     });
   };
 
   return (
     <header className="header">
       <div className="header-content">
-        <img src="/community-on.png" alt="Logo" className="header-logo" /> {/* Añadir logo */}
+        <img src="/community-on.png" alt="Logo" className="header-logo" />
         {username && (
           <div className="header-user">
             <span>Bienvenido, {username}</span>
