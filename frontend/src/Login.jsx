@@ -16,8 +16,8 @@ const buildingRoutes = {
   "torre-x": "/torre-x",
 };
 
-function Login({ setToken }) { // Ahora setToken es handleLogin
-  const [username, setUsername] = useState("");
+function Login({ setToken, setUsername }) { // Añadimos setUsername como prop
+  const [username, setUsernameInput] = useState(""); // Cambiamos a setUsernameInput para evitar confusión
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { building } = useParams();
@@ -25,9 +25,25 @@ function Login({ setToken }) { // Ahora setToken es handleLogin
 
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
 
+  // Depuración
+  console.log("API URL:", apiUrl);
+  console.log("Building from useParams:", building);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Validar building
+    if (!building || !["vow", "torre-x"].includes(building)) {
+      console.error("Building no válido:", building);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Edificio no válido. Intenta con /vow o /torre-x.",
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${apiUrl}/${building}/api/login`, {
@@ -35,7 +51,7 @@ function Login({ setToken }) { // Ahora setToken es handleLogin
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username, password }),
       });
 
       if (!response.ok) {
@@ -44,7 +60,10 @@ function Login({ setToken }) { // Ahora setToken es handleLogin
       }
 
       const data = await response.json();
-      setToken(data.token, username); // Usar handleLogin para actualizar token y username
+      setToken(data.token); // Actualiza solo el token
+      setUsername(username); // Actualiza el username
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", username);
 
       const destinationRoute = buildingRoutes[building] || "/vow";
       navigate(destinationRoute);
@@ -83,7 +102,7 @@ function Login({ setToken }) { // Ahora setToken es handleLogin
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setUsernameInput(e.target.value)}
               required
               disabled={isLoading}
             />

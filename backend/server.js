@@ -21,6 +21,14 @@ if (missingVars.length > 0) {
 
 console.log("Valores de entorno cargados:");
 console.log("SECRET_KEY:", process.env.SECRET_KEY ? "****" : "No definido");
+console.log("Torre_x_DB_USER:", process.env.Torre_x_DB_USER ? "****" : "No definido");
+console.log("Torre_x_DB_PASSWORD:", process.env.Torre_x_DB_PASSWORD ? "****" : "No definido");
+console.log("Torre_x_DB_HOST:", process.env.Torre_x_DB_HOST ? "****" : "No definido");
+console.log("Torre_x_DB_NAME:", process.env.Torre_x_DB_NAME ? "****" : "No definido");
+console.log("VOW_DB_USER:", process.env.VOW_DB_USER ? "****" : "No definido");
+console.log("VOW_DB_PASSWORD:", process.env.VOW_DB_PASSWORD ? "****" : "No definido");
+console.log("VOW_DB_HOST:", process.env.VOW_DB_HOST ? "****" : "No definido");
+console.log("VOW_DB_NAME:", process.env.VOW_DB_NAME ? "****" : "No definido");
 
 // Configuración de bases de datos por edificio
 const dbConfigs = {
@@ -62,7 +70,7 @@ const dbConfigs = {
   },
 };
 
-// Validar configuraciones de bases de datos
+// Validar configuraciones de bases de datos con más detalle
 for (const [building, config] of Object.entries(dbConfigs)) {
   const missingConfigVars = ["user", "password", "server", "database"].filter(
     (key) => !config[key]
@@ -75,6 +83,7 @@ for (const [building, config] of Object.entries(dbConfigs)) {
     );
     process.exit(1);
   }
+  console.log(`✅ Configuración válida para ${building}:`, config);
 }
 
 // Crear pools de conexión para cada edificio
@@ -131,20 +140,39 @@ const SECRET_KEY = process.env.SECRET_KEY;
 // Mapeo de nombres de edificios desde la URL a las claves en dbConfigs
 const buildingMap = {
   "vow": "vow",
-  "torre-x": "Torre_x", // Mapea "torre-x" (URL) a "Torre_x" (clave en dbConfigs)
+  "torre-x": "Torre_x",
 };
 
 // Middleware para determinar el edificio desde la URL
-app.use((req, res, next) => {
-  const buildingFromUrl = req.path.split("/")[1]; // Ejemplo: "/torre-x/api/login" -> "torre-x"
-  const building = buildingMap[buildingFromUrl]; // Mapear el nombre de la URL a la clave en dbConfigs
+app.use("/:building", (req, res, next) => {
+  const buildingFromUrl = req.params.building;
+  const building = buildingMap[buildingFromUrl];
 
-  if (!building || !dbConfigs[building]) {
-    return res.status(404).json({ error: "Edificio no encontrado" });
+  console.log(`Ruta completa: ${req.originalUrl}`);
+  console.log(`Building desde URL (req.params.building): ${buildingFromUrl}, mapeado a: ${building}`);
+  console.log(`dbConfigs[${building}]:`, dbConfigs[building] ? "Definido" : "No definido");
+
+  if (!building) {
+    console.error(`❌ No se encontró mapeo para building: ${buildingFromUrl}`);
+    return res.status(400).json({ error: "Building no mapeado correctamente" });
+  }
+  if (!dbConfigs[building]) {
+    console.error(`❌ Configuración de base de datos no encontrada para building: ${building}`);
+    return res.status(500).json({ error: "Configuración de base de datos no encontrada para el edificio" });
   }
 
   req.building = building;
   next();
+});
+
+// Ruta raíz para evitar el error "Cannot GET /"
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Bienvenido al backend de ComunidadOn" });
+});
+
+// Ruta para manejar solicitudes GET no deseadas a /torre-x/api/login
+app.get("/api/login", (req, res) => {
+  res.status(405).json({ error: "Método no permitido. Usa POST para iniciar sesión." });
 });
 
 // Función para obtener una conexión del pool según el edificio
@@ -188,7 +216,7 @@ const verifyAdmin = (req, res, next) => {
 };
 
 // Ruta de registro de nuevos usuarios (restringida a admin)
-app.post("/:building/api/register", verifyToken, verifyAdmin, async (req, res) => {
+app.post("/api/register", verifyToken, verifyAdmin, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -230,7 +258,7 @@ app.post("/:building/api/register", verifyToken, verifyAdmin, async (req, res) =
 });
 
 // Ruta de login
-app.post("/:building/api/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -270,7 +298,7 @@ app.post("/:building/api/login", async (req, res) => {
 });
 
 // Ruta de prueba para verificar conexión a Azure SQL
-app.get("/:building/api/test-db", async (req, res) => {
+app.get("/api/test-db", async (req, res) => {
   let connection;
   try {
     connection = await getDBConnection(req);
@@ -285,7 +313,7 @@ app.get("/:building/api/test-db", async (req, res) => {
 });
 
 // Ruta para obtener las mesas
-app.get("/:building/api/tables", verifyToken, async (req, res) => {
+app.get("/api/tables", verifyToken, async (req, res) => {
   let connection;
   try {
     connection = await getDBConnection(req);
@@ -300,7 +328,7 @@ app.get("/:building/api/tables", verifyToken, async (req, res) => {
 });
 
 // Ruta para obtener las reservas (con caché)
-app.get("/:building/api/reservations", verifyToken, async (req, res) => {
+app.get("/api/reservations", verifyToken, async (req, res) => {
   let connection;
   try {
     const cacheKey = `reservations_${req.building}`;
@@ -333,7 +361,7 @@ app.get("/:building/api/reservations", verifyToken, async (req, res) => {
 });
 
 // Ruta para crear una nueva reserva
-app.post("/:building/api/reservations", verifyToken, async (req, res) => {
+app.post("/api/reservations", verifyToken, async (req, res) => {
   const { tableId, turno, date } = req.body;
 
   if (!tableId || !turno || !date) {
@@ -393,7 +421,7 @@ app.post("/:building/api/reservations", verifyToken, async (req, res) => {
 });
 
 // Ruta para cancelar una reserva (restringida a admin)
-app.delete("/:building/api/reservations/:id", verifyToken, verifyAdmin, async (req, res) => {
+app.delete("/api/reservations/:id", verifyToken, verifyAdmin, async (req, res) => {
   const reservationId = req.params.id;
 
   let connection;
