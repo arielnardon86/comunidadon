@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Login from "./Login";
+import Home from "./Home"; // Importamos el nuevo componente
 import "./App.css";
 
 function App() {
@@ -36,7 +37,10 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        {/* Rutas públicas */}
+        {/* Ruta pública: Página principal */}
+        <Route path="/" element={<Home />} />
+
+        {/* Rutas públicas: Login */}
         <Route
           path="/:building/login"
           element={<Login setToken={setToken} setUsername={setUsername} />}
@@ -56,7 +60,7 @@ function App() {
                   setReservations={setReservations}
                   setToken={setToken}
                   handleLogout={handleLogout}
-                  building="vow" // Pasamos el building como prop
+                  building="vow"
                 />
               </>
             ) : (
@@ -77,7 +81,7 @@ function App() {
                   setReservations={setReservations}
                   setToken={setToken}
                   handleLogout={handleLogout}
-                  building="torre-x" // Pasamos el building como prop
+                  building="torre-x"
                 />
               </>
             ) : (
@@ -86,9 +90,8 @@ function App() {
           }
         />
 
-        {/* Redirección por defecto */}
-        <Route path="/" element={<Navigate to="/vow/login" />} />
-        <Route path="*" element={<Navigate to="/vow/login" />} />
+        {/* Redirección para rutas no encontradas */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );

@@ -99,3 +99,64 @@ html, body {
 .content {
   padding-top: 20px;
 }
+
+/* Estilos para la página principal */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh; /* Centra verticalmente ocupando el espacio disponible */
+  text-align: center;
+  padding: 20px;
+}
+
+.home-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.home-container p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.building-select {
+  padding: 10px;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+  width: 200px;
+  transition: border-color 0.3s ease;
+}
+
+.building-select:focus {
+  outline: none;
+  border-color: #007bff; /* Color de enfoque (puedes ajustarlo) */
+}
+
+/* Aseguramos que el header tenga el mismo estilo */
+header {
+  background-color: #f8f9fa; /* Color de fondo del header (ajusta según tu diseño) */
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Estilos generales para consistencia */
+.App {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5; /* Fondo claro para consistencia */
+  min-height: 100vh;
+}
