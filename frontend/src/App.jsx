@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Routes, Navigate, useParams } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Login from "./Login";
@@ -56,6 +56,7 @@ function App() {
                   setReservations={setReservations}
                   setToken={setToken}
                   handleLogout={handleLogout}
+                  building="vow" // Pasamos el building como prop
                 />
               </>
             ) : (
@@ -76,6 +77,7 @@ function App() {
                   setReservations={setReservations}
                   setToken={setToken}
                   handleLogout={handleLogout}
+                  building="torre-x" // Pasamos el building como prop
                 />
               </>
             ) : (

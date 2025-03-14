@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Schedule from "./Schedule";
 import ClubInfo from "./ClubInfo";
 
@@ -10,11 +10,11 @@ function Dashboard({
   setReservations,
   setToken,
   handleLogout,
+  building, // Usamos la prop building pasada desde App.jsx
 }) {
-  const { building } = useParams();
-  console.log("Building desde useParams en Dashboard:", building);
+  console.log("Building recibido como prop en Dashboard:", building);
   console.log("Token recibido en Dashboard:", token);
-  const [selectedBuilding, setSelectedBuilding] = useState(building || "vow");
+  const [selectedBuilding, setSelectedBuilding] = useState(building); // Usamos la prop building directamente
   const [tables, setTables] = useState([]);
   const [loadingTables, setLoadingTables] = useState(true);
   const [loadingReservations, setLoadingReservations] = useState(true);
