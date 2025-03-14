@@ -1,0 +1,48 @@
+/* frontend/src/Home.css */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f4f4f9;
+  }
+  
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Estilos para el contenedor de react-select */
+  .building-select {
+    width: 300px; /* Ancho fijo para consistencia */
+  }
+  
+  /* Opcional: Ajustes adicionales para react-select */
+  .building-select .css-1n6h0l7-control {
+    min-height: 35px; /* Ajusta la altura del control */
+  }
+  
+  .building-select .css-1pahdxg-control {
+    border-color: #ccc !important;
+    box-shadow: none !important;
+  }
+  
+  .building-select .css-1pahdxg-control:hover {
+    border-color: #007bff !important;
+  }
