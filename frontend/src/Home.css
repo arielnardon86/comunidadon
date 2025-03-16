@@ -4,45 +4,106 @@
     flex-direction: column;
     min-height: 100vh;
     background-color: #f4f4f9;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .header-logo {
+    width: 15%;
+    height: auto;
+    align-self: flex-start;
+    margin: 10px 0 0 20px;
+    max-height: 60px;
+  }
+  
+  .banner {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: url('/src/assets/backgrounds/home-background.avif') no-repeat center center/cover;
+    overflow: hidden;
+    margin-top: 0;
+  }
+  
+  .banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 40px;
   }
   
   .content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: center;
+    text-align: left;
+    color: #fff;
+    z-index: 1;
   }
   
-  h1 {
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 1rem;
+  .content h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #fff; /* Cambiado a blanco para legibilidad */
+    margin-bottom: 0.5rem;
   }
   
-  p {
+  .content p {
     font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 1.5rem;
+    color: #fff; /* Cambiado a blanco para legibilidad */
+    margin-bottom: 2rem;
   }
   
-  /* Estilos para el contenedor de react-select */
+  .selector-container {
+    width: 500px; /* Selector más ancho */
+    margin: 0;
+  }
+  
   .building-select {
-    width: 300px; /* Ancho fijo para consistencia */
+    width: 100%;
   }
   
-  /* Opcional: Ajustes adicionales para react-select */
+  /* Ajustes para react-select */
   .building-select .css-1n6h0l7-control {
-    min-height: 35px; /* Ajusta la altura del control */
+    min-height: 40px;
   }
   
   .building-select .css-1pahdxg-control {
-    border-color: #ccc !important;
+    border-color: #3272b2 !important;
     box-shadow: none !important;
   }
   
   .building-select .css-1pahdxg-control:hover {
-    border-color: #007bff !important;
+    border-color: #3272b2 !important;
+  }
+  
+  /* Responsividad */
+  @media (max-width: 768px) {
+    .banner {
+      height: 400px;
+    }
+  
+    .content h1 {
+      font-size: 2.5rem;
+    }
+  
+    .content p {
+      font-size: 1rem;
+    }
+  
+    .selector-container {
+      width: 350px; /* Ajustado para pantallas pequeñas */
+    }
+  
+    .header-logo {
+      width: 30%;
+      margin: 10px 0 0 15px;
+      max-height: 50px;
+    }
+  
+    .banner-overlay {
+      padding: 20px;
+    }
   }
