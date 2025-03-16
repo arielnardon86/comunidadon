@@ -82,7 +82,7 @@
   /* Responsividad */
   @media (max-width: 768px) {
     .banner {
-      height: 400px;
+      height: 450px;
     }
   
     .content h1 {
