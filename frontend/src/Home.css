@@ -94,17 +94,27 @@
     }
   
     .selector-container {
-      width: 600px; /* Ajustado para pantallas pequeñas */
+      width: 500px; /* Ajustado para pantallas pequeñas */
     }
   
     .header-logo {
-      width: 30%;
+      width: 15%;
       margin: 10px 0 0 15px;
       max-height: 50px;
     }
   
     .banner-overlay {
       padding: 10px;
-      width: 600px;
+      width: 30%;
     }
+    .building-select {
+        padding: 10px;
+        font-size: 1.1rem;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        cursor: pointer;
+        width: 10px;
+        transition: border-color 0.3s ease;
+      }
   }
