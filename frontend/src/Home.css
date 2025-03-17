@@ -8,8 +8,8 @@
     z-index: 1;
   }
   
-  .header-logo {
-    width: 5%;
+  .header-logo-home {
+    width: 15%;
     height: auto;
     align-self: flex-start;
     margin: 10px 0 0 20px;
@@ -97,8 +97,8 @@
       width: 500px; /* Ajustado para pantallas pequeñas */
     }
   
-    .header-logo {
-      width: 15%;
+    .header-logo-home {
+      width: 30%;
       margin: 10px 0 0 15px;
       max-height: 50px;
     }

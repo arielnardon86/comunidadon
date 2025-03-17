@@ -34,7 +34,7 @@ function Home() {
 
   return (
     <div className="home-container">
-      <img src="/header-home.png" alt="Logo" className="header-logo" />
+      <img src="/header-home.png" alt="Logo" className="header-logo-home" />
       <div className="banner">
         <div className="banner-overlay">
           <div className="content">
