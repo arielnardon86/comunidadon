@@ -23,6 +23,7 @@
     margin: 0 auto; /* Ajustado para pantallas grandes */
     table-layout: fixed;
     box-sizing: border-box;
+    color: rgb(11, 4, 4);
   }
   
   .calendar-table th,
@@ -36,12 +37,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 18px; /* Mover desde index.css */
+    
   }
   
   .calendar-table th {
     background-color: #f4f4f4;
     font-weight: bold;
     font-size: 1rem;
+    color: rgb(11, 4, 4);
   }
   
   .available {

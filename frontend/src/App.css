@@ -76,6 +76,7 @@ html, body {
 
   .content {
     padding-top: 15px;
+    color: rgb(11, 4, 4);
   }
 }
 
@@ -130,7 +131,7 @@ html, body {
   border: 1px solid #ccc;
   background-color: #fff;
   cursor: pointer;
-  width: 200px;
+  width: 400px;
   transition: border-color 0.3s ease;
 }
 
@@ -141,7 +142,7 @@ html, body {
 
 /* Aseguramos que el header tenga el mismo estilo */
 header {
-  background-color: #f8f9fa; /* Color de fondo del header (ajusta según tu diseño) */
+  background-color: #fafafa; /* Color de fondo del header (ajusta según tu diseño) */
   padding: 1rem;
   display: flex;
   justify-content: space-between;

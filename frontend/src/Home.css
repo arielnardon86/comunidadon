@@ -9,7 +9,7 @@
   }
   
   .header-logo {
-    width: 15%;
+    width: 5%;
     height: auto;
     align-self: flex-start;
     margin: 10px 0 0 20px;
@@ -39,20 +39,20 @@
   
   .content {
     text-align: left;
-    color: #fff;
+    color: #fafafa;
     z-index: 1;
   }
   
   .content h1 {
     font-size: 3.5rem;
     font-weight: bold;
-    color: #fff; /* Cambiado a blanco para legibilidad */
+    color: #07020262; /* Cambiado a blanco para legibilidad */
     margin-bottom: 0.5rem;
   }
   
   .content p {
     font-size: 1.2rem;
-    color: #fff; /* Cambiado a blanco para legibilidad */
+    color: #00000062; /* Cambiado a blanco para legibilidad */
     margin-bottom: 2rem;
   }
   
@@ -94,7 +94,7 @@
     }
   
     .selector-container {
-      width: 350px; /* Ajustado para pantallas pequeñas */
+      width: 600px; /* Ajustado para pantallas pequeñas */
     }
   
     .header-logo {
@@ -104,6 +104,7 @@
     }
   
     .banner-overlay {
-      padding: 20px;
+      padding: 10px;
+      width: 600px;
     }
   }

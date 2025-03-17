@@ -308,7 +308,7 @@ function Schedule({
 
       <p className="info-text">
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
-        día en el que querés realizar tu reserva y luego seleccioná la cancha y
+        día en el que querés realizar tu reserva, elegí la mesa y
         el turno haciendo click y listo!
       </p>
       {username === "admin" && (
