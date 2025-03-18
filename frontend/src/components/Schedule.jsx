@@ -4,6 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import "../styles/Schedule.css";
 
+// Función auxiliar para formatear la fecha
+const formatDate = (dateStr) => {
+  const [year, month, day] = dateStr.split("-");
+  return `${day}-${month}-${year}`;
+};
+
 function Schedule({
   tables,
   reservations,
@@ -81,20 +87,23 @@ function Schedule({
       return;
     }
 
+    // Formatear la fecha para la alerta
+    const formattedDate = formatDate(selectedDate);
+
     // Mostrar alerta de confirmación antes de reservar
     const confirmReservation = await Swal.fire({
       title: "¿Estás seguro?",
-      text: `Esta acción confirmará la reserva para la ${turno} del ${selectedDate}. ¿Deseas continuar?`,
+      text: `Esta acción confirmará la reserva para la ${turno} del ${formattedDate}. ¿Deseas continuar?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#4CAF50", // Verde para confirmar
-      cancelButtonColor: "#d33", // Rojo para cancelar
+      confirmButtonColor: "#4CAF50",
+      cancelButtonColor: "#d33",
       confirmButtonText: "Sí, reservar",
       cancelButtonText: "No, cancelar",
     });
 
     if (!confirmReservation.isConfirmed) {
-      return; // No hace nada si el usuario cancela
+      return;
     }
 
     setIsLoading(true);
@@ -139,10 +148,11 @@ function Schedule({
 
       await fetchUpdatedReservations();
 
+      // Formatear la fecha para la alerta de éxito
       Swal.fire({
         icon: "success",
         title: "Reserva exitosa",
-        text: `Has reservado la ${turno} del ${selectedDate}`,
+        text: `Has reservado la ${turno} del ${formattedDate}`,
       });
     } catch (error) {
       console.error("Error al reservar:", error);
