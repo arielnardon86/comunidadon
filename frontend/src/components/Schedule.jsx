@@ -81,6 +81,22 @@ function Schedule({
       return;
     }
 
+    // Mostrar alerta de confirmación antes de reservar
+    const confirmReservation = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: `Esta acción confirmará la reserva para la ${turno} del ${selectedDate}. ¿Deseas continuar?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#4CAF50", // Verde para confirmar
+      cancelButtonColor: "#d33", // Rojo para cancelar
+      confirmButtonText: "Sí, reservar",
+      cancelButtonText: "No, cancelar",
+    });
+
+    if (!confirmReservation.isConfirmed) {
+      return; // No hace nada si el usuario cancela
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch(
