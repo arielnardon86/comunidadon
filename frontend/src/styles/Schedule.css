@@ -18,8 +18,8 @@
 .calendar-table {
   width: 100%; /* Por defecto para pantallas grandes */
   border-collapse: collapse; /* Cambiado de separate a collapse para consistencia */
-  border-radius: 10px; /* Mover desde index.css */
-  overflow: hidden; /* Mover desde index.css */
+  border-radius: 8px; /* Ajustado a 8px para consistencia con .calendar-container */
+  overflow: hidden; /* Asegurar que los bordes redondeados se apliquen */
   margin: 0 auto; /* Ajustado para pantallas grandes */
   table-layout: fixed;
   box-sizing: border-box;
@@ -91,7 +91,7 @@
     width: 95vw; /* Ocupar todo el ancho de la pantalla */
     margin: 0; /* Eliminar márgenes */
     padding: 0; /* Eliminar paddings */
-    border-radius: 0;
+    border-radius: 8px; /* Restaurar bordes redondeados */
     border-left: 1px solid #ccc; /* Forzar borde izquierdo visible */
     border-right: 1px solid #ccc; /* Forzar borde derecho visible */
     box-sizing: border-box;
@@ -104,6 +104,8 @@
     table-layout: fixed;
     box-sizing: border-box;
     border-collapse: collapse;
+    border-radius: 8px; /* Ajustar bordes redondeados */
+    overflow: hidden; /* Asegurar que los bordes redondeados se apliquen */
   }
 
   .calendar-table th,
@@ -150,6 +152,7 @@
     width: 80%;
     margin: 0;
     padding: 0;
+    border-radius: 8px; /* Restaurar bordes redondeados */
   }
 
   .calendar-table th,
