@@ -4,6 +4,7 @@ html, body {
   padding: 0;
   box-sizing: border-box;
   width: 100vw;
+  height: 100vh; /* Asegurar altura completa */
   overflow-x: hidden;
 }
 
@@ -16,6 +17,7 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100vw;
+  height: 100vh; /* Asegurar altura completa */
   max-width: none;
 }
 
@@ -64,6 +66,7 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100vw;
+    height: 100vh;
     max-width: none;
   }
 
@@ -71,7 +74,7 @@ html, body {
     max-width: none !important;
     width: 100vw;
     margin: 0;
-    padding: 0;
+    padding: 0; /* Eliminar padding izquierdo */
   }
 
   .content {
@@ -84,10 +87,10 @@ html, body {
 @media (min-width: 641px) {
   .dashboard-container {
     max-width: 800px !important;
-    margin-left: 0; /* Resetear márgenes */
+    margin-left: 0; /* Eliminar margen izquierdo */
     margin-right: 0;
-    padding-left: 50px; /* Mover un poco más a la derecha con padding */
-    text-align: left; /* Mantener texto alineado a la izquierda */
+    padding-left: 0; /* Eliminar padding izquierdo */
+    text-align: left;
   }
 
   .content {
@@ -101,15 +104,17 @@ html, body {
   padding-top: 20px;
 }
 
-/* Estilos para la página principal */
+/* Estilos para la página principal (ajustado) */
 .home-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 80vh; /* Centra verticalmente ocupando el espacio disponible */
+  min-height: 100vh; /* Ocupar toda la altura */
   text-align: center;
-  padding: 20px;
+  padding: 0; /* Eliminar padding */
+  margin: 0; /* Eliminar margen */
+  width: 100vw; /* Ocupar todo el ancho */
 }
 
 .home-container h1 {
@@ -137,17 +142,19 @@ html, body {
 
 .building-select:focus {
   outline: none;
-  border-color: #007bff; /* Color de enfoque (puedes ajustarlo) */
+  border-color: #007bff;
 }
 
 /* Aseguramos que el header tenga el mismo estilo */
 header {
-  background-color: #fafafa; /* Color de fondo del header (ajusta según tu diseño) */
+  background-color: #fafafa;
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100vw; /* Ocupar todo el ancho */
+  margin: 0; /* Eliminar margen */
 }
 
 header h2 {
@@ -158,6 +165,6 @@ header h2 {
 /* Estilos generales para consistencia */
 .App {
   font-family: Arial, sans-serif;
-  background-color: #f0f2f5; /* Fondo claro para consistencia */
+  background-color: #f0f2f5;
   min-height: 100vh;
 }
