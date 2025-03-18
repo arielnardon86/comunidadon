@@ -10,7 +10,7 @@ function Home() {
   const navigate = useNavigate();
   const [selectedBuilding, setSelectedBuilding] = useState(null);
 
-  // Opciones para el desplegable
+  // Opciones para el desplegable (añadí más opciones para simular muchos edificios)
   const buildingOptions = [
     { value: "vow", label: "VOW" },
     { value: "torre-x", label: "Torre X" },
@@ -66,12 +66,12 @@ const customStyles = {
     minHeight: "40px",
     padding: "8px",
     borderRadius: "20px",
-    border: "2px solid #3272b2", 
+    border: "2px solid #3272b2",
     backgroundColor: "#fff",
     boxShadow: "none",
     transition: "all 0.3s ease",
     "&:hover": {
-      borderColor: "#3272b2", 
+      borderColor: "#3272b2",
     },
   }),
   singleValue: (provided) => ({
@@ -89,6 +89,16 @@ const customStyles = {
     borderRadius: "8px",
     marginTop: "4px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    zIndex: 10000, /* Alto z-index para superponerse */
+    position: "absolute", /* Posicionamiento absoluto */
+    width: "100%", /* Ancho completo del control */
+    maxHeight: "200px", /* Altura máxima antes de permitir desplazamiento */
+    overflowY: "auto", /* Desplazamiento vertical */
+  }),
+  menuList: (provided) => ({
+    ...provided,
+    maxHeight: "200px", /* Altura máxima del menú */
+    overflowY: "auto", /* Desplazamiento si hay muchas opciones */
   }),
   option: (provided, state) => ({
     ...provided,
