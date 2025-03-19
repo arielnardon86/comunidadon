@@ -93,7 +93,7 @@ function Schedule({
     // Mostrar alerta de confirmación antes de reservar
     const confirmReservation = await Swal.fire({
       title: "¿Estás seguro?",
-      text: `Esta acción confirmará la reserva para la ${turno} del ${formattedDate}. ¿Deseas continuar?`,
+      text: `Esta acción confirmará la siguiente reserva: ${turno} del ${formattedDate}. ¿Deseas continuar?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#4CAF50",
@@ -344,6 +344,7 @@ function Schedule({
           cancelar.
         </p>
       )}
+
       <div className="calendar-wrapper">
         {tables.length === 0 ? (
           <p className="loading-message">
@@ -355,6 +356,7 @@ function Schedule({
               <thead>
                 <tr>
                   <th>
+                    <p className="calendar-label">Selecciona una fecha</p>
                     <input
                       type="date"
                       value={selectedDate}

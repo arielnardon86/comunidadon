@@ -75,6 +75,12 @@
   text-align: center;
   color: #666;
 }
+.calendar-table th .calendar-label {
+  font-size: 0.9rem !important; /* Forzar tamaño de letra más pequeño para "Calendario" */
+  margin: 0; /* Eliminar margen superior/inferior */
+  padding: 0; /* Eliminar padding interno */
+  line-height: 1;
+}
 
 /* Media query para pantallas pequeñas (por debajo de 640px) */
 @media (max-width: 640px) {
@@ -123,21 +129,29 @@
 
   .calendar-table th:first-child,
   .calendar-table td:first-child {
-    width: 33.33%;
+    width: 40%; /* Aumentar el ancho de la celda del calendario */
   }
 
   .calendar-table th:nth-child(2),
   .calendar-table td:nth-child(2),
   .calendar-table th:nth-child(3),
   .calendar-table td:nth-child(3) {
-    width: 33.33%;
+    width: 30%; /* Reducir el ancho de las otras columnas proporcionalmente */
+  }
+
+  .calendar-label {
+    font-size: 1rem !important; /* Tamaño de letra más pequeño para "Calendario" */
+    margin: 0; /* Eliminar margen superior/inferior */
+    padding: 0; /* Eliminar padding interno */
+    line-height: 1; /* Ajustar altura de línea para que no se separe tanto */
   }
 
   .calendar-table th input[type="date"] {
     width: 100%;
     box-sizing: border-box;
-    padding: 2px;
-    font-size: 0.7rem;
+    padding: 1px;
+    font-size: 0.9rem;
+    margin-top: 1px; /* Pequeño margen para separar del texto */
   }
 }
 
@@ -169,5 +183,16 @@
   .calendar-table th input[type="date"] {
     font-size: 1rem;
     padding: 1px;
+  }
+  .calendar-label {
+    font-size: 0.1rem; /* Tamaño de letra más pequeño para "Calendario" */
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+  .calendar-table th input[type="date"] {
+    font-size: 1rem;
+    padding: 1px;
+    margin-top: 1px; /* Pequeño margen para separar del texto */
   }
 }
