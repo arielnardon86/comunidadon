@@ -36,7 +36,7 @@ function Footer() {
         <div className="footer-contact">
           <h3>Contacto</h3>
           <p>Email: <a href="mailto:communityon@gmail.com">communityon@gmail.com</a></p>
-          <p>Teléfono: <a href="tel:+54 9 351 5464113"></a>+54 9 351 5464113</p>
+          <p>Teléfono: <a href="tel:+54 9 351 5464113"></a>351 5464113</p>
         </div>
       </div>
       <div className="footer-bottom">
