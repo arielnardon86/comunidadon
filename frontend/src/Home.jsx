@@ -32,10 +32,10 @@ function Home() {
   );
 
   return (
-    <div className="home-container">
-      <img src="/header-home.png" alt="Logo" className="header-logo-home" />
-      <div className="banner">
-        <div className="banner-overlay">
+    <div className="banner">
+      <div className="banner-overlay">
+        <div className="home-container">
+          <img src="/header-home.png" alt="Logo" className="header-logo-home" />
           <div className="content">
             <h1>Reservá tu lugar al instante</h1>
             <p>Ponemos la tecnología al servicio de la comunidad</p>
