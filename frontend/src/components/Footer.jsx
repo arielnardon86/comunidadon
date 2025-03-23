@@ -10,7 +10,7 @@ function Footer() {
         {/* Logo */}
         <div className="footer-logo">
           <img
-            src="./public/header-home.png" // Ajusta la ruta según la ubicación de tu logo
+            src="/header-home.png" // Ajusta la ruta según la ubicación de tu logo
             alt="Community On Logo"
             className="logo-image"
           />
