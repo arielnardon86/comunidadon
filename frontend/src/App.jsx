@@ -1,9 +1,11 @@
+// src/App.jsx
 import { useState, useEffect } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Login from "./Login";
-import Home from "./Home"; // Importamos el nuevo componente
+import Home from "./Home";
+import Footer from "./components/Footer"; // Importa el Footer
 import "./App.css";
 
 function App() {
@@ -35,7 +37,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="app-container">
       <Routes>
         {/* Ruta pública: Página principal */}
         <Route path="/" element={<Home />} />
@@ -93,6 +95,7 @@ function App() {
         {/* Redirección para rutas no encontradas */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <Footer /> {/* Añade el Footer aquí para que se muestre en todas las páginas */}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import Schedule from "./Schedule";
 import ClubInfo from "./ClubInfo";
 
+
 function Dashboard({
   token,
   username,

@@ -1,7 +1,6 @@
 // frontend/src/Home.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./components/Header";
 import Select from "react-select";
 import { FaBuilding } from "react-icons/fa";
 import "./Home.css";
@@ -10,7 +9,7 @@ function Home() {
   const navigate = useNavigate();
   const [selectedBuilding, setSelectedBuilding] = useState(null);
 
-  // Opciones para el desplegable (añadí más opciones para simular muchos edificios)
+  // Opciones para el desplegable
   const buildingOptions = [
     { value: "vow", label: "VOW" },
     { value: "torre-x", label: "Torre X" },
@@ -89,16 +88,16 @@ const customStyles = {
     borderRadius: "8px",
     marginTop: "4px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    zIndex: 10000, /* Alto z-index para superponerse */
-    position: "absolute", /* Posicionamiento absoluto */
-    width: "100%", /* Ancho completo del control */
-    maxHeight: "200px", /* Altura máxima antes de permitir desplazamiento */
-    overflowY: "auto", /* Desplazamiento vertical */
+    zIndex: 10000,
+    position: "absolute",
+    width: "100%",
+    maxHeight: "200px",
+    overflowY: "auto",
   }),
   menuList: (provided) => ({
     ...provided,
-    maxHeight: "200px", /* Altura máxima del menú */
-    overflowY: "auto", /* Desplazamiento si hay muchas opciones */
+    maxHeight: "200px",
+    overflowY: "auto",
   }),
   option: (provided, state) => ({
     ...provided,
