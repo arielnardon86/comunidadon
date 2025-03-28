@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import "../styles/Schedule.css";
+import { API_BASE_URL } from "../config"; // Importamos API_BASE_URL
 
 // Función auxiliar para formatear la fecha
 const formatDate = (dateStr) => {
@@ -25,14 +26,12 @@ function Schedule({
   const [newPassword, setNewPassword] = useState("");
 
   console.log("selectedBuilding en Schedule:", selectedBuilding);
-  console.log("token en Schedule:", token); // Depuración
-  console.log("tables en Schedule:", tables); // Depuración
-
-  const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
+  console.log("token en Schedule:", token);
+  console.log("tables en Schedule:", tables);
 
   // Recargar reservas cuando cambia la fecha seleccionada
   useEffect(() => {
-    console.log("Ejecutando useEffect para recargar reservas..."); // Depuración
+    console.log("Ejecutando useEffect para recargar reservas...");
     console.log("selectedDate:", selectedDate);
     console.log("selectedBuilding:", selectedBuilding);
     console.log("token:", token);
@@ -41,13 +40,14 @@ function Schedule({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `${apiUrl}/${selectedBuilding}/api/reservations`,
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${await response.text()}`);
+          const errorText = await response.text();
+          throw new Error(`Error ${response.status}: ${errorText}`);
         }
         const updatedReservations = await response.json();
         setReservations(updatedReservations);
@@ -69,7 +69,7 @@ function Schedule({
     } else {
       console.warn("No se ejecutó fetchReservations porque selectedBuilding o token no están definidos");
     }
-  }, [selectedDate, selectedBuilding, token, setReservations, apiUrl]);
+  }, [selectedDate, selectedBuilding, token, setReservations]);
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
@@ -109,7 +109,7 @@ function Schedule({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${apiUrl}/${selectedBuilding}/api/reservations`,
+        `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
         {
           method: "POST",
           headers: {
@@ -133,7 +133,7 @@ function Schedule({
 
       const fetchUpdatedReservations = async () => {
         const reservationsRes = await fetch(
-          `${apiUrl}/${selectedBuilding}/api/reservations`,
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -164,7 +164,7 @@ function Schedule({
 
       try {
         const reservationsRes = await fetch(
-          `${apiUrl}/${selectedBuilding}/api/reservations`,
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -212,7 +212,7 @@ function Schedule({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${apiUrl}/${selectedBuilding}/api/reservations/${reservationId}`,
+        `${API_BASE_URL}/${selectedBuilding}/api/reservations/${reservationId}`, // Usamos API_BASE_URL
         {
           method: "DELETE",
           headers: {
@@ -227,7 +227,7 @@ function Schedule({
       }
 
       const reservationsRes = await fetch(
-        `${apiUrl}/${selectedBuilding}/api/reservations`,
+        `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -270,7 +270,7 @@ function Schedule({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${apiUrl}/${selectedBuilding}/api/register`,
+        `${API_BASE_URL}/${selectedBuilding}/api/register`, // Usamos API_BASE_URL
         {
           method: "POST",
           headers: {

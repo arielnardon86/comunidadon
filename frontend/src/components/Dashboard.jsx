@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import Schedule from "./Schedule";
 import ClubInfo from "./ClubInfo";
-
+import { API_BASE_URL } from "../config"; // Importamos API_BASE_URL
 
 function Dashboard({
   token,
@@ -11,16 +11,16 @@ function Dashboard({
   setReservations,
   setToken,
   handleLogout,
-  building, // Usamos la prop building pasada desde App.jsx
+  building,
 }) {
   console.log("Building recibido como prop en Dashboard:", building);
   console.log("Token recibido en Dashboard:", token);
-  const [selectedBuilding, setSelectedBuilding] = useState(building); // Usamos la prop building directamente
+  const [selectedBuilding, setSelectedBuilding] = useState(building);
   const [tables, setTables] = useState([]);
   const [loadingTables, setLoadingTables] = useState(true);
   const [loadingReservations, setLoadingReservations] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]); // Estado para la fecha
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
     console.log("selectedBuilding en useEffect:", selectedBuilding);
@@ -30,7 +30,7 @@ function Dashboard({
       setLoadingTables(true);
       try {
         const response = await fetch(
-          `https://comunidadon-backend.onrender.com/${selectedBuilding}/api/tables`,
+          `${API_BASE_URL}/${selectedBuilding}/api/tables`, // Usamos API_BASE_URL
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -54,7 +54,7 @@ function Dashboard({
       setLoadingReservations(true);
       try {
         const response = await fetch(
-          `https://comunidadon-backend.onrender.com/${selectedBuilding}/api/reservations`,
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
           {
             headers: { Authorization: `Bearer ${token}` },
           }

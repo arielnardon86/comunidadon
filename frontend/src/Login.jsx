@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Agregamos useEffect para la solicitud
 import Swal from "sweetalert2";
 import { useParams, useNavigate } from "react-router-dom";
 import "./styles/Login.css";
 import vowBackground from "./assets/backgrounds/vow-background.jpg";
 import torreBackground from "./assets/backgrounds/torre-x-background.jpg";
 import defaultBackground from "./assets/backgrounds/default-portada.jpg";
+import { API_BASE_URL } from "./config"; // Importamos API_BASE_URL
 
 const backgroundImages = {
   vow: vowBackground,
@@ -20,32 +21,55 @@ function Login({ setToken, setUsername }) {
   const [usernameInput, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [validBuildings, setValidBuildings] = useState([]); // Estado para la lista de edificios válidos
   const { building } = useParams();
   const navigate = useNavigate();
 
-  const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
+  // Obtener la lista de edificios válidos al montar el componente
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/buildings`);
+        if (!response.ok) {
+          throw new Error("Error al obtener los edificios");
+        }
+        const data = await response.json();
+        setValidBuildings(data);
+      } catch (error) {
+        console.error("Error al obtener los edificios:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo cargar la lista de edificios. Intenta de nuevo más tarde.",
+        });
+      }
+    };
 
-  console.log("API URL:", apiUrl);
+    fetchBuildings();
+  }, []);
+
+  console.log("API URL:", API_BASE_URL);
   console.log("Building from useParams:", building);
-  console.log("Full login URL:", `${apiUrl}/${building}/api/login`);
+  console.log("Full login URL:", `${API_BASE_URL}/${building}/api/login`);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!building || !["vow", "torre-x"].includes(building)) {
+    // Validar si el edificio es válido
+    if (!building || !validBuildings.includes(building)) {
       console.error("Building no válido:", building);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Edificio no válido. Intenta con /vow o /torre-x.",
+        text: `Edificio no válido. Los edificios disponibles son: ${validBuildings.join(", ")}.`,
       });
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${apiUrl}/${building}/api/login`, {
+      const response = await fetch(`${API_BASE_URL}/${building}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,12 +85,12 @@ function Login({ setToken, setUsername }) {
       }
 
       const data = await response.json();
-      setToken(data.token); // Usar setToken como prop
-      setUsername(usernameInput); // Usar setUsername como prop
+      setToken(data.token);
+      setUsername(usernameInput);
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", usernameInput);
 
-      const destinationRoute = buildingRoutes[building] || "/vow";
+      const destinationRoute = buildingRoutes[building] || `/${building}`;
       navigate(destinationRoute);
 
       Swal.fire({

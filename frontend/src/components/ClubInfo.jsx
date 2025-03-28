@@ -13,102 +13,74 @@ import {
   faGlassCheers,
   faHome,
 } from "@fortawesome/free-solid-svg-icons";
+import { API_BASE_URL } from "../config"; // Importamos API_BASE_URL
 
-// Objeto de configuración por edificio
-const buildingInfo = {
-  vow: {
-    title: "Información del Club Vow",
-    backgroundImage: null,
-    textColor: "#2d3748",
-    regulation: {
-      rules: ["Respetar los horarios establecidos", "No hacer ruidos molestos", "Mantener el espacio limpio"],
-    },
-    horarios: {
-      mediodia: "Todos los días: 12:00 a 16:00",
-      noche: [
-        "Domingo a Jueves: 20:00 a 01:00",
-        "Viernes y Sábados: 20:00 a 02:00",
-      ],
-    },
-    servicios: [
-      { icon: faWifi, text: "Wifi" },
-      { icon: faTv, text: "TV" },
-      { icon: faToilet, text: "Baños" },
-      { icon: faParking, text: "Estacionamiento" },
-      { icon: faMedkit, text: "Seguro Médico" },
-      { icon: faBanSmoking, text: "Prohibido fumar" },
-      { icon: faBirthdayCake, text: "Cumpleaños" },
-      { icon: faUtensils, text: "Parrilla" },
-    ],
-  },
-  "torre-x": {
-    title: "Información del Club Torre X",
-    backgroundImage: null,
-    textColor: "#4a5568",
-    regulation: {
-      rules: ["Prohibido traer bebidas alcohólicas", "No se permiten mascotas", "Respetar el aforo máximo"],
-    },
-    horarios: {
-      mediodia: "Lunes a Viernes: 11:00 a 15:00",
-      noche: [
-        "Domingo a Jueves: 19:00 a 23:00",
-        "Viernes y Sábados: 19:00 a 00:00",
-      ],
-    },
-    servicios: [
-      { icon: faWifi, text: "Wifi" },
-      { icon: faTv, text: "TV" },
-      { icon: faToilet, text: "Baños" },
-      { icon: faParking, text: "Estacionamiento" },
-      { icon: faGlassCheers, text: "Eventos sociales" },
-      { icon: faHome, text: "Espacios familiares" },
-    ],
-  },
-  default: {
-    title: "Información del Club",
-    backgroundImage: null,
-    textColor: "#718096",
-    regulation: {
-      rules: ["Reglamento no disponible", "Contacta al administrador"],
-    },
-    horarios: {
-      mediodia: "No disponible",
-      noche: ["No disponible"],
-    },
-    servicios: [],
-  },
+// Mapeo de nombres de íconos a los íconos de FontAwesome
+const iconMap = {
+  faWifi,
+  faBanSmoking,
+  faParking,
+  faMedkit,
+  faToilet,
+  faBirthdayCake,
+  faUtensils,
+  faTv,
+  faGlassCheers,
+  faHome,
 };
 
-function ClubInfo({ token, building }) { // Usar prop building en lugar de useParams
+// Configuración por defecto en caso de que el backend falle
+const defaultInfo = {
+  title: "Información del Club",
+  backgroundImage: null,
+  textColor: "#718096",
+  regulation: {
+    rules: ["Reglamento no disponible", "Contacta al administrador"],
+  },
+  horarios: {
+    mediodia: "No disponible",
+    noche: ["No disponible"],
+  },
+  servicios: [],
+};
+
+function ClubInfo({ token, building }) {
   const [regulationExpanded, setRegulationExpanded] = useState(false);
   const [horariosExpanded, setHorariosExpanded] = useState(false);
   const [serviciosExpanded, setServiciosExpanded] = useState(false);
-  const [info, setInfo] = useState(buildingInfo[building] || buildingInfo.default);
+  const [info, setInfo] = useState(defaultInfo);
 
-  console.log("Building recibido como prop:", building); // Depuración
-  console.log("Info inicial:", buildingInfo[building] || buildingInfo.default); // Depuración
+  console.log("Building recibido como prop:", building);
+  console.log("Token recibido:", token);
 
   useEffect(() => {
     const fetchClubInfo = async () => {
       try {
         const response = await fetch(
-          `https://comunidadon-backend.onrender.com/${building}/api/club-info`,
+          `${API_BASE_URL}/${building}/api/club-info`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         console.log("Respuesta del backend /api/club-info:", response);
-        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
         const data = await response.json();
         console.log("Datos del backend:", data);
         setInfo(data);
       } catch (error) {
         console.error("Error fetching club info:", error);
-        setInfo(buildingInfo[building] || buildingInfo.default);
+        setInfo(defaultInfo);
       }
     };
 
-    if (token) fetchClubInfo();
+    if (token && building) {
+      fetchClubInfo();
+    } else {
+      console.warn("No se ejecutó fetchClubInfo porque token o building no están definidos");
+      setInfo(defaultInfo);
+    }
   }, [building, token]);
 
   const toggleRegulation = () => setRegulationExpanded(!regulationExpanded);
@@ -176,7 +148,7 @@ function ClubInfo({ token, building }) { // Usar prop building en lugar de usePa
                 <ul className="services-list">
                   {info.servicios.map((service, index) => (
                     <li key={index}>
-                      <FontAwesomeIcon icon={service.icon} /> {service.text}
+                      <FontAwesomeIcon icon={iconMap[service.icon]} /> {service.text}
                     </li>
                   ))}
                 </ul>

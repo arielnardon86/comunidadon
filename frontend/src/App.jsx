@@ -1,17 +1,35 @@
-// src/App.jsx
 import { useState, useEffect } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Login from "./Login";
 import Home from "./Home";
-import Footer from "./components/Footer"; // Importa el Footer
+import Footer from "./components/Footer";
 import "./App.css";
+import { API_BASE_URL } from "./config"; // Importa API_BASE_URL
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [username, setUsername] = useState(localStorage.getItem("username") || "");
   const [reservations, setReservations] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/buildings`); // Usa API_BASE_URL
+        if (!response.ok) {
+          throw new Error("Error al obtener los edificios");
+        }
+        const data = await response.json();
+        setBuildings(data);
+      } catch (error) {
+        console.error("Error al obtener los edificios:", error);
+      }
+    };
+
+    fetchBuildings();
+  }, []);
 
   const handleLogin = (newToken, newUsername) => {
     setToken(newToken);
@@ -39,63 +57,46 @@ function App() {
   return (
     <div className="app-container">
       <Routes>
-        {/* Ruta pública: Página principal */}
         <Route path="/" element={<Home />} />
-
-        {/* Rutas públicas: Login */}
         <Route
           path="/:building/login"
           element={<Login setToken={setToken} setUsername={setUsername} />}
         />
-
-        {/* Rutas protegidas */}
-        <Route
-          path="/vow"
-          element={
-            token ? (
-              <>
-                <Header username={username} handleLogout={handleLogout} building="vow" />
-                <Dashboard
-                  token={token}
-                  username={username}
-                  reservations={reservations}
-                  setReservations={setReservations}
-                  setToken={setToken}
-                  handleLogout={handleLogout}
-                  building="vow"
-                />
-              </>
-            ) : (
-              <Navigate to="/vow/login" />
-            )
-          }
-        />
-        <Route
-          path="/torre-x"
-          element={
-            token ? (
-              <>
-                <Header username={username} handleLogout={handleLogout} building="torre-x" />
-                <Dashboard
-                  token={token}
-                  username={username}
-                  reservations={reservations}
-                  setReservations={setReservations}
-                  setToken={setToken}
-                  handleLogout={handleLogout}
-                  building="torre-x"
-                />
-              </>
-            ) : (
-              <Navigate to="/torre-x/login" />
-            )
-          }
-        />
-
-        {/* Redirección para rutas no encontradas */}
+        {buildings.length > 0 ? (
+          buildings.map((building) => (
+            <Route
+              key={building}
+              path={`/${building}`}
+              element={
+                token ? (
+                  <>
+                    <Header
+                      username={username}
+                      handleLogout={handleLogout}
+                      building={building}
+                    />
+                    <Dashboard
+                      token={token}
+                      username={username}
+                      reservations={reservations}
+                      setReservations={setReservations}
+                      setToken={setToken}
+                      handleLogout={handleLogout}
+                      building={building}
+                    />
+                  </>
+                ) : (
+                  <Navigate to={`/${building}/login`} />
+                )
+              }
+            />
+          ))
+        ) : (
+          <Route path="*" element={<p>Cargando edificios...</p>} />
+        )}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-      <Footer /> {/* Añade el Footer aquí para que se muestre en todas las páginas */}
+      <Footer />
     </div>
   );
 }
