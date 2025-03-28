@@ -1,19 +1,49 @@
 // frontend/src/Home.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { FaBuilding } from "react-icons/fa";
+import { API_BASE_URL } from "./config"; // Importamos API_BASE_URL
 import "./Home.css";
 
 function Home() {
   const navigate = useNavigate();
   const [selectedBuilding, setSelectedBuilding] = useState(null);
+  const [buildingOptions, setBuildingOptions] = useState([]); // Estado para las opciones dinámicas
 
-  // Opciones para el desplegable
-  const buildingOptions = [
-    { value: "vow", label: "VOW" },
-    { value: "torre-x", label: "Torre X" },
-  ];
+  // Obtener la lista de edificios desde el backend al montar el componente
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/buildings`);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        const buildings = await response.json();
+        console.log("Edificios obtenidos del backend:", buildings);
+
+        // Transformar la lista de edificios al formato de react-select
+        const options = buildings.map((building) => ({
+          value: building,
+          label: building
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" "),
+        }));
+        setBuildingOptions(options);
+      } catch (error) {
+        console.error("Error al obtener los edificios:", error);
+        // Fallback en caso de error
+        setBuildingOptions([
+          { value: "vow", label: "VOW" },
+          { value: "torre-x", label: "Torre X" },
+          { value: "miraflores-i", label: "Miraflores I" },
+        ]);
+      }
+    };
+
+    fetchBuildings();
+  }, []);
 
   // Manejar la selección del edificio
   const handleBuildingChange = (selectedOption) => {
