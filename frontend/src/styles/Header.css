@@ -1,76 +1,82 @@
+/* src/styles/Header.css */
 .header {
-    padding: 10px 5px;
-    box-sizing: border-box;
-    width: 100%;
-    background-color: transparent;
-    box-shadow: none;
+  padding: 10px 5px;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.header-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Asegura que el logo y el usuario estén en los extremos */
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Estilos del logo */
+.header-logo {
+  height: 40px;
+  width: auto; /* Mantiene la proporción del logo */
+  max-width: 150px; /* Limita el ancho máximo para evitar que se estire demasiado */
+  margin-left: 0; /* Elimina el margen negativo para un posicionamiento más natural */
+  object-fit: contain; /* Asegura que el logo no se deforme */
+}
+
+/* Estilos del contenedor del usuario */
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Estilos del botón de logout */
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 640px) {
+  .header {
+    padding: 5px;
   }
-  
+
   .header-content {
-    width: 100%;
-    display: flex;
+    padding: 0 5px;
+    flex-direction: row; /* Mantiene el layout en fila para mobile */
+    justify-content: space-between; /* Logo a la izquierda, usuario a la derecha */
     align-items: center;
-    padding: 0 10px;
-    box-sizing: border-box;
-    position: relative;
   }
-  
+
   .header-logo {
-    height: 40px;
-    margin-left: -10px;
-    max-width: 100%;
+    height: 30px; /* Reduce el tamaño del logo en mobile */
+    width: auto; /* Mantiene la proporción */
+    max-width: 120px; /* Limita el ancho máximo en mobile */
+    object-fit: contain; /* Asegura que el logo no se deforme */
   }
-  
+
   .header-user {
-    display: flex;
+    position: static; /* Elimina el posicionamiento relativo */
+    transform: none; /* Elimina el transform */
+    gap: 5px;
     align-items: center;
-    gap: 10px;
-    position: relative;
-    left: calc(50% - 150px);
-    transform: translateX(-50%);
   }
-  
+
   .logout-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    padding: 4px 6px;
+    font-size: 0.8rem;
   }
-  
-  .logout-button:hover {
-    background-color: #c0392b;
-  }
-  
-  /* Ajustes para pantallas pequeñas */
-  @media (max-width: 640px) {
-    .header {
-      padding: 5px 5px;
-    }
-  
-    .header-content {
-      padding: 0 5px;
-    }
-  
-    .header-logo {
-      width: 10%;
-      margin-left: -5px;
-      max-width: 100%;
-      height: auto;
-    }
-  
-    .header-user {
-      flex-direction: row;
-      gap: 5px;
-      left: calc(75% - 120px); /* Mover más a la derecha (de 50% a 75%) */
-      transform: translateX(-50%);
-    }
-  
-    .logout-button {
-      padding: 4px 6px;
-      font-size: 0.8rem;
-      white-space: nowrap;
-    }
-  }
+}

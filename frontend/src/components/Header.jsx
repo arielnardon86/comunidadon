@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Agregamos Link
 import Swal from "sweetalert2";
 import "../styles/Header.css";
 
@@ -24,7 +24,10 @@ function Header({ username, handleLogout, building }) {
   return (
     <header className="header">
       <div className="header-content">
-        <img src="/community-on.png" alt="Logo" className="header-logo" />
+        {/* Envolvemos el logo en un Link para redirigir a "/" */}
+        <Link to="./Home">
+          <img src="/community-on.png" alt="Community On Logo" className="header-logo" />
+        </Link>
         {username && (
           <div className="header-user">
             <span>Bienvenido, {username}</span>

@@ -1,7 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Agregamos Link
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInstagram, faTwitter, faFacebook } from "@fortawesome/free-brands-svg-icons";
-import "../styles/Footer.css"; // Importa los estilos del footer
+import "../styles/Footer.css";
 
 function Footer() {
   return (
@@ -9,11 +10,14 @@ function Footer() {
       <div className="footer-container">
         {/* Logo */}
         <div className="footer-logo">
-          <img
-            src="/header-home.png" // Ajusta la ruta según la ubicación de tu logo
-            alt="Community On Logo"
-            className="logo-image"
-          />
+          {/* Envolvemos el logo en un Link para redirigir a "/" */}
+          <Link to="./Home">
+            <img
+              src="/header-home.png"
+              alt="Community On Logo"
+              className="logo-image"
+            />
+          </Link>
         </div>
 
         {/* Redes Sociales */}
@@ -36,11 +40,11 @@ function Footer() {
         <div className="footer-contact">
           <h3>Contacto</h3>
           <p>Email: <a href="mailto:communityon@gmail.com">communityon@gmail.com</a></p>
-          <p>Teléfono: <a href="tel:+54 9 351 5464113"></a>351 5464113</p>
+          <p>Teléfono: <a href="tel:+54 9 351 5464113">351 5464113</a></p>
         </div>
       </div>
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} Community On. Todos los derechos reservados.</p>
+        <p>© {new Date().getFullYear()} Community On. Todos los derechos reservados.</p>
       </div>
     </footer>
   );
