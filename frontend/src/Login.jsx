@@ -1,31 +1,19 @@
-import { useState, useEffect } from "react"; // Agregamos useEffect para la solicitud
+// frontend/src/Login.jsx
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { useParams, useNavigate } from "react-router-dom";
 import "./styles/Login.css";
-import vowBackground from "./assets/backgrounds/vow-background.jpg";
-import torreBackground from "./assets/backgrounds/torre-x-background.jpg";
-import defaultBackground from "./assets/backgrounds/default-portada.jpg";
-import { API_BASE_URL } from "./config"; // Importamos API_BASE_URL
-
-const backgroundImages = {
-  vow: vowBackground,
-  "torre-x": torreBackground,
-};
-
-const buildingRoutes = {
-  vow: "/vow",
-  "torre-x": "/torre-x",
-};
+import { API_BASE_URL } from "./config";
 
 function Login({ setToken, setUsername }) {
   const [usernameInput, setUsernameInput] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [validBuildings, setValidBuildings] = useState([]); // Estado para la lista de edificios válidos
+  const [validBuildings, setValidBuildings] = useState([]);
+  const [backgroundImage, setBackgroundImage] = useState(null);
   const { building } = useParams();
   const navigate = useNavigate();
 
-  // Obtener la lista de edificios válidos al montar el componente
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
@@ -45,18 +33,30 @@ function Login({ setToken, setUsername }) {
       }
     };
 
-    fetchBuildings();
-  }, []);
+    const fetchBackground = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/${building}/api/background`);
+        if (!response.ok) {
+          throw new Error("Error al obtener el fondo");
+        }
+        const data = await response.json();
+        setBackgroundImage(data.backgroundImage);
+      } catch (error) {
+        console.error("Error al obtener el fondo:", error);
+        setBackgroundImage("/images/default-portada.jpg");
+      }
+    };
 
-  console.log("API URL:", API_BASE_URL);
-  console.log("Building from useParams:", building);
-  console.log("Full login URL:", `${API_BASE_URL}/${building}/api/login`);
+    fetchBuildings();
+    if (building) {
+      fetchBackground();
+    }
+  }, [building]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validar si el edificio es válido
     if (!building || !validBuildings.includes(building)) {
       console.error("Building no válido:", building);
       Swal.fire({
@@ -90,7 +90,7 @@ function Login({ setToken, setUsername }) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", usernameInput);
 
-      const destinationRoute = buildingRoutes[building] || `/${building}`;
+      const destinationRoute = `/${building}`;
       navigate(destinationRoute);
 
       Swal.fire({
@@ -110,12 +110,10 @@ function Login({ setToken, setUsername }) {
     }
   };
 
-  const backgroundImage = backgroundImages[building] || defaultBackground;
-
   return (
     <div
       className="login-container"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
+      style={{ backgroundImage: backgroundImage ? `url(${API_BASE_URL}${backgroundImage})` : "none" }}
     >
       <div className="login-box">
         <h2>Iniciar Sesión - {building.replace("-", " ").toUpperCase()}</h2>
