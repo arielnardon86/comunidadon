@@ -334,13 +334,13 @@ function Schedule({
 
       <p className="info-text">
         <FontAwesomeIcon icon={faCircleInfo} /> Seleccioná en el calendario el
-        día en el que querés realizar tu reserva, elegí la mesa y
+        día en el que querés realizar tu reserva, elegí el espacio y
         el turno haciendo click y listo!
       </p>
       {username === "admin" && (
         <p className="info-text admin">
           <FontAwesomeIcon icon={faCircleInfo} /> Como administrador, puedes
-          cancelar reservas! Para hacerlo, haz click en la reserva que desas
+          cancelar reservas! Para hacerlo, hacé click en la reserva que desas
           cancelar.
         </p>
       )}
