@@ -27,9 +27,6 @@ function Footer() {
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
               <FontAwesomeIcon icon={faInstagram} className="social-icon" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faTwitter} className="social-icon" />
-            </a>
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
               <FontAwesomeIcon icon={faFacebook} className="social-icon" />
             </a>
@@ -39,7 +36,7 @@ function Footer() {
         {/* Contacto */}
         <div className="footer-contact">
           <h3>Contacto</h3>
-          <p>Email: <a href="mailto:communityon@gmail.com">communityon@gmail.com</a></p>
+          <p>Email: <a href="mailto:communityon@gmail.com">communityonarg@gmail.com</a></p>
           <p>Teléfono: <a href="tel:+54 9 351 5464113">351 5464113</a></p>
         </div>
       </div>
