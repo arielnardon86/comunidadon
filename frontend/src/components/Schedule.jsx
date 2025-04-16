@@ -280,7 +280,7 @@ function Schedule({
 
     setIsLoading(true);
     try {
-      // Combinar el prefijo +549 con el número ingresado (si existe)
+      // Combinar el prefijo +549 con el número ingresado 
       const fullPhoneNumber = phoneNumber ? `+549${phoneNumber}` : null;
 
       const response = await fetch(
