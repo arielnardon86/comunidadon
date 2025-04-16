@@ -24,6 +24,7 @@ function Schedule({
   const [isLoading, setIsLoading] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(""); // Nuevo estado para el número telefónico
 
   console.log("selectedBuilding en Schedule:", selectedBuilding);
   console.log("token en Schedule:", token);
@@ -267,8 +268,21 @@ function Schedule({
       return;
     }
 
+    // Validar el número telefónico (si se ingresó)
+    if (phoneNumber && !/^\d{9,10}$/.test(phoneNumber)) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "El número telefónico debe tener entre 9 y 10 dígitos (sin el prefijo +549).",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Combinar el prefijo +549 con el número ingresado (si existe)
+      const fullPhoneNumber = phoneNumber ? `+549${phoneNumber}` : null;
+
       const response = await fetch(
         `${API_BASE_URL}/${selectedBuilding}/api/register`, // Usamos API_BASE_URL
         {
@@ -277,7 +291,11 @@ function Schedule({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ username: newUsername, password: newPassword }),
+          body: JSON.stringify({
+            username: newUsername,
+            password: newPassword,
+            phone_number: fullPhoneNumber, // Incluimos el número telefónico
+          }),
         }
       );
 
@@ -294,6 +312,7 @@ function Schedule({
       });
       setNewUsername("");
       setNewPassword("");
+      setPhoneNumber(""); // Limpiamos el campo del número telefónico
     } catch (error) {
       console.error("Error al registrar:", error);
       Swal.fire({
@@ -489,6 +508,28 @@ function Schedule({
                     boxSizing: "border-box",
                   }}
                 />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
+                  Número Telefónico (Opcional):
+                </label>
+                <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Número telefónico sin 0 ni 15"
+                    pattern="\d{9,10}"
+                    disabled={isLoading}
+                    style={{
+                      padding: "8px",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
               </div>
               <button
                 type="submit"
