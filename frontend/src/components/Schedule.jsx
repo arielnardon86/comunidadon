@@ -24,7 +24,8 @@ function Schedule({
   const [isLoading, setIsLoading] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState(""); // Nuevo estado para el número telefónico
+  const [phoneNumber, setPhoneNumber] = useState(""); // Estado para el número telefónico
+  const [email, setEmail] = useState(""); // Nuevo estado para el correo electrónico
 
   console.log("selectedBuilding en Schedule:", selectedBuilding);
   console.log("token en Schedule:", token);
@@ -278,6 +279,16 @@ function Schedule({
       return;
     }
 
+    // Validar el correo electrónico (si se ingresó)
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "El correo electrónico no tiene un formato válido.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Combinar el prefijo +549 con el número ingresado 
@@ -295,6 +306,7 @@ function Schedule({
             username: newUsername,
             password: newPassword,
             phone_number: fullPhoneNumber, // Incluimos el número telefónico
+            email: email || null, // Incluimos el correo electrónico
           }),
         }
       );
@@ -313,6 +325,7 @@ function Schedule({
       setNewUsername("");
       setNewPassword("");
       setPhoneNumber(""); // Limpiamos el campo del número telefónico
+      setEmail(""); // Limpiamos el campo del correo electrónico
     } catch (error) {
       console.error("Error al registrar:", error);
       Swal.fire({
@@ -530,6 +543,25 @@ function Schedule({
                     }}
                   />
                 </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+                <label style={{ marginBottom: "5px", fontWeight: "bold" }}>
+                  Correo Electrónico (Opcional):
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Ejemplo: usuario@dominio.com"
+                  disabled={isLoading}
+                  style={{
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
+                />
               </div>
               <button
                 type="submit"
