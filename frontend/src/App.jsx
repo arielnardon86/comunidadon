@@ -5,31 +5,60 @@ import Dashboard from "./components/Dashboard";
 import Login from "./Login";
 import Home from "./Home";
 import Footer from "./components/Footer";
+import Swal from "sweetalert2";
 import "./App.css";
-import { API_BASE_URL } from "./config"; // Importa API_BASE_URL
+import { API_BASE_URL } from "./config";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [username, setUsername] = useState(localStorage.getItem("username") || "");
   const [reservations, setReservations] = useState([]);
   const [buildings, setBuildings] = useState([]);
+  const [isLoadingBuildings, setIsLoadingBuildings] = useState(true);
 
   useEffect(() => {
     const fetchBuildings = async () => {
+      if (!token) {
+        setIsLoadingBuildings(false);
+        return; // No intenta cargar edificios si no hay token
+      }
+
       try {
-        const response = await fetch(`${API_BASE_URL}/api/buildings`); // Usa API_BASE_URL
+        setIsLoadingBuildings(true);
+        const response = await fetch(`${API_BASE_URL}/api/buildings`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
-          throw new Error("Error al obtener los edificios");
+          throw new Error(`Error ${response.status}: ${await response.text()}`);
         }
         const data = await response.json();
         setBuildings(data);
       } catch (error) {
         console.error("Error al obtener los edificios:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudieron cargar los edificios. Por favor, inicia sesión nuevamente.",
+        });
+        handleLogout(); // Cierra sesión si falla la carga de edificios
+      } finally {
+        setIsLoadingBuildings(false);
       }
     };
 
     fetchBuildings();
-  }, []);
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      setUsername("");
+      setBuildings([]); // Limpia los edificios si no hay token
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+    }
+  }, [token]);
 
   const handleLogin = (newToken, newUsername) => {
     setToken(newToken);
@@ -38,18 +67,11 @@ function App() {
     localStorage.setItem("username", newUsername);
   };
 
-  useEffect(() => {
-    if (!token) {
-      setUsername("");
-      localStorage.removeItem("token");
-      localStorage.removeItem("username");
-    }
-  }, [token]);
-
   const handleLogout = () => {
     setToken("");
     setUsername("");
     setReservations([]);
+    setBuildings([]);
     localStorage.removeItem("token");
     localStorage.removeItem("username");
   };
@@ -62,7 +84,9 @@ function App() {
           path="/:building/login"
           element={<Login setToken={setToken} setUsername={setUsername} />}
         />
-        {buildings.length > 0 ? (
+        {isLoadingBuildings ? (
+          <Route path="*" element={<p>Cargando edificios...</p>} />
+        ) : buildings.length > 0 ? (
           buildings.map((building) => (
             <Route
               key={building}
@@ -92,7 +116,15 @@ function App() {
             />
           ))
         ) : (
-          <Route path="*" element={<p>Cargando edificios...</p>} />
+          <Route
+            path="*"
+            element={
+              <p>
+                No se encontraron edificios. Por favor, inicia sesión o contacta
+                al administrador.
+              </p>
+            }
+          />
         )}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

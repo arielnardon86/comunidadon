@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import Schedule from "./Schedule";
 import ClubInfo from "./ClubInfo";
-import { API_BASE_URL } from "../config"; // Importamos API_BASE_URL
+import { API_BASE_URL } from "../config";
 
 function Dashboard({
   token,
@@ -15,7 +15,6 @@ function Dashboard({
 }) {
   console.log("Building recibido como prop en Dashboard:", building);
   console.log("Token recibido en Dashboard:", token);
-  const [selectedBuilding, setSelectedBuilding] = useState(building);
   const [tables, setTables] = useState([]);
   const [loadingTables, setLoadingTables] = useState(true);
   const [loadingReservations, setLoadingReservations] = useState(true);
@@ -23,14 +22,14 @@ function Dashboard({
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
-    console.log("selectedBuilding en useEffect:", selectedBuilding);
-    console.log("token en useEffect:", token);
+    console.log("Building en useEffect:", building);
+    console.log("Token en useEffect:", token);
 
     const fetchTables = async () => {
       setLoadingTables(true);
       try {
         const response = await fetch(
-          `${API_BASE_URL}/${selectedBuilding}/api/tables`, // Usamos API_BASE_URL
+          `${API_BASE_URL}/${building}/api/tables`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -54,7 +53,7 @@ function Dashboard({
       setLoadingReservations(true);
       try {
         const response = await fetch(
-          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
+          `${API_BASE_URL}/${building}/api/reservations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -73,17 +72,17 @@ function Dashboard({
       }
     };
 
-    if (selectedBuilding && token) {
+    if (building && token) {
       fetchTables();
       fetchReservations();
     } else {
-      console.warn("selectedBuilding o token no definidos:", { selectedBuilding, token });
+      console.warn("Building o token no definidos:", { building, token });
       setError("Token o edificio no definidos");
     }
-  }, [selectedBuilding, token, setReservations]);
+  }, [building, token, setReservations]);
 
   if (!token) {
-    return <Navigate to={`/${selectedBuilding}/login`} />;
+    return <Navigate to={`/${building}/login`} />;
   }
 
   if (error) {
@@ -101,7 +100,7 @@ function Dashboard({
   return (
     <div className="dashboard-container">
       <div className="content">
-        <h1>Reservas - {selectedBuilding.replace('-', ' ').toUpperCase()}</h1>
+        <h1>Reservas - {building.replace("-", " ").toUpperCase()}</h1>
         {loadingTables || loadingReservations ? (
           <p>Cargando datos...</p>
         ) : (
@@ -112,11 +111,11 @@ function Dashboard({
               setReservations={setReservations}
               token={token}
               username={username}
-              selectedBuilding={selectedBuilding}
+              selectedBuilding={building} // Usamos el prop building
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
             />
-            <ClubInfo building={selectedBuilding} token={token} />
+            <ClubInfo building={building} token={token} />
           </>
         )}
       </div>

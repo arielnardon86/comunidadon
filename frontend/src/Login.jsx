@@ -1,4 +1,3 @@
-// frontend/src/Login.jsx
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,59 +9,61 @@ function Login({ setToken, setUsername }) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [validBuildings, setValidBuildings] = useState([]);
-  const [backgroundImage, setBackgroundImage] = useState(null);
+  const [backgroundImage, setBackgroundImage] = useState("/images/default-portada.jpg"); // Valor por defecto
   const { building } = useParams();
   const navigate = useNavigate();
+  const [initialToken] = useState(localStorage.getItem("token") || ""); // Token inicial para intentar cargar edificios
 
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/buildings`);
+        const headers = initialToken
+          ? { Authorization: `Bearer ${initialToken}` }
+          : {};
+        const response = await fetch(`${API_BASE_URL}/api/buildings`, {
+          headers,
+        });
         if (!response.ok) {
+          if (response.status === 401 && !initialToken) {
+            console.warn("No token disponible, edificios no cargados.");
+            return; // No hay token, no intentamos cargar edificios
+          }
           throw new Error("Error al obtener los edificios");
         }
         const data = await response.json();
         setValidBuildings(data);
       } catch (error) {
         console.error("Error al obtener los edificios:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "No se pudo cargar la lista de edificios. Intenta de nuevo más tarde.",
-        });
-      }
-    };
-
-    const fetchBackground = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/${building}/api/background`);
-        if (!response.ok) {
-          throw new Error("Error al obtener el fondo");
+        if (!initialToken) {
+          Swal.fire({
+            icon: "warning",
+            title: "Sin acceso",
+            text: "Debes iniciar sesión para cargar los edificios.",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No se pudo cargar la lista de edificios. Intenta de nuevo más tarde.",
+          });
         }
-        const data = await response.json();
-        setBackgroundImage(data.backgroundImage);
-      } catch (error) {
-        console.error("Error al obtener el fondo:", error);
-        setBackgroundImage("/images/default-portada.jpg");
       }
     };
 
     fetchBuildings();
-    if (building) {
-      fetchBackground();
-    }
-  }, [building]);
+    // Eliminamos fetchBackground hasta que el backend lo soporte
+  }, [initialToken]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!building || !validBuildings.includes(building)) {
+    if (!building || (validBuildings.length > 0 && !validBuildings.includes(building))) {
       console.error("Building no válido:", building);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: `Edificio no válido. Los edificios disponibles son: ${validBuildings.join(", ")}.`,
+        text: `Edificio no válido. Los edificios disponibles son: ${validBuildings.join(", ") || "ninguno cargado"}.`,
       });
       setIsLoading(false);
       return;
@@ -113,10 +114,10 @@ function Login({ setToken, setUsername }) {
   return (
     <div
       className="login-container"
-      style={{ backgroundImage: backgroundImage ? `url(${API_BASE_URL}${backgroundImage})` : "none" }}
+      style={{ backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none" }}
     >
       <div className="login-box">
-        <h2>Iniciar Sesión - {building.replace("-", " ").toUpperCase()}</h2>
+        <h2>Iniciar Sesión - {building?.replace("-", " ").toUpperCase() || "Selecciona un edificio"}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>Usuario:</label>
