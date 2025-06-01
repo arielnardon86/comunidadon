@@ -16,7 +16,7 @@ function Login({ setToken, setUsername }) {
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/buildings`); // Ahora pública
+        const response = await fetch(`${API_BASE_URL}/api/buildings`);
         if (!response.ok) throw new Error("Error al obtener los edificios");
         const data = await response.json();
         setValidBuildings(data);
@@ -26,10 +26,23 @@ function Login({ setToken, setUsername }) {
       }
     };
 
+    const fetchBackground = async () => {
+      if (!building) return; // Evitar solicitud si no hay building
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/background/${building}`);
+        if (!response.ok) throw new Error("Error al obtener el fondo");
+        const data = await response.json();
+        // Construir la URL completa usando API_BASE_URL
+        setBackgroundImage(`${API_BASE_URL}${data.backgroundImage}`);
+      } catch (error) {
+        console.error("Error al obtener el fondo:", error);
+        setBackgroundImage("https://via.placeholder.com/1500x500"); // Fallback
+      }
+    };
+
     fetchBuildings();
-    // Usamos la ruta temporal de background
-    setBackgroundImage(`${API_BASE_URL}/images/default-portada.jpg`); // URL absoluta
-  }, []);
+    fetchBackground();
+  }, [building, API_BASE_URL]); // Recargar cuando cambie building
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,7 +104,14 @@ function Login({ setToken, setUsername }) {
   return (
     <div
       className="login-container"
-      style={{ backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none" }}
+      style={{
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+        backgroundSize: "cover",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
       <div className="login-box">
         <h2>Iniciar Sesión - {building?.replace("-", " ").toUpperCase() || "Selecciona un edificio"}</h2>
