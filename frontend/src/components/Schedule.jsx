@@ -3,12 +3,30 @@ import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleInfo, faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import "../styles/Schedule.css";
-import { API_BASE_URL } from "../config"; // Importamos API_BASE_URL
+import { API_BASE_URL } from "../config";
 
 // Función auxiliar para formatear la fecha
 const formatDate = (dateStr) => {
   const [year, month, day] = dateStr.split("-");
   return `${day}-${month}-${year}`;
+};
+
+// Función para decodificar el payload del token JWT (sin verificar la firma)
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Error al decodificar el token:", error);
+    return null;
+  }
 };
 
 function Schedule({
@@ -24,12 +42,57 @@ function Schedule({
   const [isLoading, setIsLoading] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState(""); // Estado para el número telefónico
-  const [email, setEmail] = useState(""); // Nuevo estado para el correo electrónico
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [turns, setTurns] = useState([]); // Lista de turnos disponibles
 
   console.log("selectedBuilding en Schedule:", selectedBuilding);
   console.log("token en Schedule:", token);
   console.log("tables en Schedule:", tables);
+
+  // Validar que selectedBuilding esté definido
+  useEffect(() => {
+    if (!selectedBuilding) {
+      console.error("selectedBuilding no está definido en Schedule.jsx");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo determinar el edificio. Contacta al administrador.",
+      });
+    }
+  }, [selectedBuilding]);
+
+  // Obtener los turnos disponibles para el edificio
+  useEffect(() => {
+    const fetchTurns = async () => {
+      if (!selectedBuilding || !token) return;
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/${selectedBuilding}/api/turns`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error ${response.status}: ${errorText}`);
+        }
+        const turnsData = await response.json();
+        setTurns(turnsData);
+        console.log("Turnos cargados:", turnsData);
+      } catch (error) {
+        console.error("Error al cargar los turnos:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudieron cargar los turnos disponibles.",
+        });
+      }
+    };
+
+    fetchTurns();
+  }, [selectedBuilding, token]);
 
   // Recargar reservas cuando cambia la fecha seleccionada
   useEffect(() => {
@@ -39,10 +102,14 @@ function Schedule({
     console.log("token:", token);
 
     const fetchReservations = async () => {
+      if (!selectedBuilding) {
+        throw new Error("selectedBuilding no está definido");
+      }
+
       setIsLoading(true);
       try {
         const response = await fetch(
-          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -78,7 +145,7 @@ function Schedule({
     console.log("Fecha seleccionada:", event.target.value);
   };
 
-  const handleReservationClick = async (tableId, turno) => {
+  const handleReservationClick = async (tableId, turnId, turnName) => {
     if (!selectedBuilding) {
       console.error("selectedBuilding es undefined en handleReservationClick");
       Swal.fire({
@@ -89,13 +156,11 @@ function Schedule({
       return;
     }
 
-    // Formatear la fecha para la alerta
     const formattedDate = formatDate(selectedDate);
 
-    // Mostrar alerta de confirmación antes de reservar
     const confirmReservation = await Swal.fire({
       title: "¿Estás seguro?",
-      text: `Esta acción confirmará la siguiente reserva: ${turno} del ${formattedDate}. ¿Deseas continuar?`,
+      text: `Esta acción confirmará la siguiente reserva: ${turnName} del ${formattedDate}. ¿Deseas continuar?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#4CAF50",
@@ -111,14 +176,14 @@ function Schedule({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
+        `${API_BASE_URL}/${selectedBuilding}/api/reservations`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ tableId, turno, date: selectedDate }),
+          body: JSON.stringify({ tableId, turnId, date: selectedDate }),
         }
       );
 
@@ -135,7 +200,7 @@ function Schedule({
 
       const fetchUpdatedReservations = async () => {
         const reservationsRes = await fetch(
-          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -150,11 +215,10 @@ function Schedule({
 
       await fetchUpdatedReservations();
 
-      // Formatear la fecha para la alerta de éxito
       Swal.fire({
         icon: "success",
         title: "Reserva exitosa",
-        text: `Has reservado la ${turno} del ${formattedDate}`,
+        text: `Has reservado la ${turnName} del ${formattedDate}`,
       });
     } catch (error) {
       console.error("Error al reservar:", error);
@@ -166,7 +230,7 @@ function Schedule({
 
       try {
         const reservationsRes = await fetch(
-          `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
+          `${API_BASE_URL}/${selectedBuilding}/api/reservations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -178,7 +242,7 @@ function Schedule({
           const isAlreadyReserved = updatedReservations.some(
             (res) =>
               res.tableId === tableId &&
-              res.turno === turno &&
+              res.turnId === turnId &&
               res.date === selectedDate
           );
           if (isAlreadyReserved) {
@@ -214,7 +278,7 @@ function Schedule({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${API_BASE_URL}/${selectedBuilding}/api/reservations/${reservationId}`, // Usamos API_BASE_URL
+        `${API_BASE_URL}/${selectedBuilding}/api/reservations/${reservationId}`,
         {
           method: "DELETE",
           headers: {
@@ -229,7 +293,7 @@ function Schedule({
       }
 
       const reservationsRes = await fetch(
-        `${API_BASE_URL}/${selectedBuilding}/api/reservations`, // Usamos API_BASE_URL
+        `${API_BASE_URL}/${selectedBuilding}/api/reservations`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -289,13 +353,42 @@ function Schedule({
       return;
     }
 
+    // Validar que selectedBuilding esté definido
+    if (!selectedBuilding) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo determinar el edificio. Contacta al administrador.",
+      });
+      return;
+    }
+
+    // Validar que el token pertenezca al edificio seleccionado
+    const decodedToken = decodeToken(token);
+    if (!decodedToken || !decodedToken.building) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo determinar el edificio desde el token.",
+      });
+      return;
+    }
+
+    if (decodedToken.building !== selectedBuilding) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `El token pertenece al edificio ${decodedToken.building}, pero estás intentando registrar un usuario en ${selectedBuilding}. Usa un token del edificio correcto.`,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Combinar el prefijo +549 con el número ingresado 
       const fullPhoneNumber = phoneNumber ? `+549${phoneNumber}` : null;
 
       const response = await fetch(
-        `${API_BASE_URL}/${selectedBuilding}/api/register`, // Usamos API_BASE_URL
+        `${API_BASE_URL}/${selectedBuilding}/api/register`,
         {
           method: "POST",
           headers: {
@@ -305,15 +398,15 @@ function Schedule({
           body: JSON.stringify({
             username: newUsername,
             password: newPassword,
-            phone_number: fullPhoneNumber, // Incluimos el número telefónico
-            email: email || null, // Incluimos el correo electrónico
+            phone_number: fullPhoneNumber,
+            email: email || null,
           }),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al registrar usuario");
+        throw new Error(errorData.error || `Error ${response.status}: Error al registrar usuario`);
       }
 
       const data = await response.json();
@@ -324,8 +417,8 @@ function Schedule({
       });
       setNewUsername("");
       setNewPassword("");
-      setPhoneNumber(""); // Limpiamos el campo del número telefónico
-      setEmail(""); // Limpiamos el campo del correo electrónico
+      setPhoneNumber("");
+      setEmail("");
     } catch (error) {
       console.error("Error al registrar:", error);
       Swal.fire({
@@ -378,7 +471,7 @@ function Schedule({
       )}
 
       <div className="calendar-wrapper">
-        {tables.length === 0 ? (
+        {tables.length === 0 || turns.length === 0 ? (
           <p className="loading-message">
             Cargando calendario de reservas...
           </p>
@@ -396,8 +489,9 @@ function Schedule({
                       disabled={isLoading}
                     />
                   </th>
-                  <th>Mediodía</th>
-                  <th>Noche</th>
+                  {turns.map((turn) => (
+                    <th key={turn.id}>{turn.name}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -409,14 +503,15 @@ function Schedule({
                   return (
                     <tr key={table.id}>
                       <td>{table.name}</td>
-                      {["mediodía", "noche"].map((turno) => {
+                      {turns.map((turn) => {
                         const reservation = filteredReservations.find(
-                          (res) => res.tableId === table.id && res.turno === turno
+                          (res) => res.tableId === table.id && res.turnId === turn.id
                         );
                         const isReserved = !!reservation;
                         console.log("Checking reservation:", {
                           tableId: table.id,
-                          turno,
+                          turnId: turn.id,
+                          turnName: turn.name,
                           date: selectedDate,
                           isReserved,
                           reservedBy: reservation?.username,
@@ -424,13 +519,13 @@ function Schedule({
 
                         return (
                           <td
-                            key={turno}
+                            key={turn.id}
                             className={`${isReserved ? "reserved" : "available"} ${
                               isReserved && username === "admin" ? "admin" : ""
                             } ${isLoading ? "disabled" : ""}`}
                             title={
                               isReserved && username === "admin"
-                                ? `Reservado por: ${reservation.username}`
+                                ? `Reservado por: ${reservation.username} (${reservation.phone_number || "Sin teléfono"})`
                                 : ""
                             }
                             onClick={() => {
@@ -438,7 +533,7 @@ function Schedule({
                               if (isReserved && username === "admin") {
                                 handleCancelReservation(reservation.id);
                               } else if (!isReserved) {
-                                handleReservationClick(table.id, turno);
+                                handleReservationClick(table.id, turn.id, turn.name);
                               }
                             }}
                           >
