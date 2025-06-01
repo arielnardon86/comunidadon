@@ -9,50 +9,27 @@ function Login({ setToken, setUsername }) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [validBuildings, setValidBuildings] = useState([]);
-  const [backgroundImage, setBackgroundImage] = useState("/images/default-portada.jpg"); // Valor por defecto
+  const [backgroundImage, setBackgroundImage] = useState(null);
   const { building } = useParams();
   const navigate = useNavigate();
-  const [initialToken] = useState(localStorage.getItem("token") || ""); // Token inicial para intentar cargar edificios
 
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
-        const headers = initialToken
-          ? { Authorization: `Bearer ${initialToken}` }
-          : {};
-        const response = await fetch(`${API_BASE_URL}/api/buildings`, {
-          headers,
-        });
-        if (!response.ok) {
-          if (response.status === 401 && !initialToken) {
-            console.warn("No token disponible, edificios no cargados.");
-            return; // No hay token, no intentamos cargar edificios
-          }
-          throw new Error("Error al obtener los edificios");
-        }
+        const response = await fetch(`${API_BASE_URL}/api/buildings`); // Ahora pública
+        if (!response.ok) throw new Error("Error al obtener los edificios");
         const data = await response.json();
         setValidBuildings(data);
       } catch (error) {
         console.error("Error al obtener los edificios:", error);
-        if (!initialToken) {
-          Swal.fire({
-            icon: "warning",
-            title: "Sin acceso",
-            text: "Debes iniciar sesión para cargar los edificios.",
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "No se pudo cargar la lista de edificios. Intenta de nuevo más tarde.",
-          });
-        }
+        setValidBuildings(["vow"]); // Fallback a 'vow' si falla
       }
     };
 
     fetchBuildings();
-    // Eliminamos fetchBackground hasta que el backend lo soporte
-  }, [initialToken]);
+    // Usamos la ruta temporal de background
+    setBackgroundImage(`${API_BASE_URL}/images/default-portada.jpg`); // URL absoluta
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

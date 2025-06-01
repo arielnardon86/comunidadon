@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import Login from "./Login";
@@ -15,6 +15,7 @@ function App() {
   const [reservations, setReservations] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [isLoadingBuildings, setIsLoadingBuildings] = useState(true);
+  const location = useLocation(); // Para rastrear la ruta actual
 
   useEffect(() => {
     const fetchBuildings = async () => {
@@ -75,6 +76,15 @@ function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
   };
+
+  // Redirige al login si intenta acceder a /:building sin token
+  const requiresLogin = location.pathname.match(/^\/[^/]+$/); // Coincide con rutas como /vow
+  const isLoginRoute = location.pathname.includes("/login"); // Verifica si ya está en una ruta de login
+
+  if (requiresLogin && !token && !isLoginRoute) {
+    const building = location.pathname.split("/")[1];
+    return <Navigate to={`/${building}/login`} />;
+  }
 
   return (
     <div className="app-container">

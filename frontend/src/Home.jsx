@@ -1,15 +1,15 @@
-// frontend/src/Home.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { FaBuilding } from "react-icons/fa";
-import { API_BASE_URL } from "./config"; // Importamos API_BASE_URL
+import { API_BASE_URL } from "./config";
 import "./Home.css";
 
 function Home() {
   const navigate = useNavigate();
   const [selectedBuilding, setSelectedBuilding] = useState(null);
-  const [buildingOptions, setBuildingOptions] = useState([]); // Estado para las opciones dinámicas
+  const [buildingOptions, setBuildingOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
 
   // Obtener la lista de edificios desde el backend al montar el componente
   useEffect(() => {
@@ -33,12 +33,12 @@ function Home() {
         setBuildingOptions(options);
       } catch (error) {
         console.error("Error al obtener los edificios:", error);
-        // Fallback en caso de error
+        // Fallback ajustado para incluir solo 'vow'
         setBuildingOptions([
           { value: "vow", label: "VOW" },
-          { value: "torre-x", label: "Torre X" },
-          { value: "miraflores-i", label: "Miraflores I" },
         ]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -74,11 +74,14 @@ function Home() {
                 value={selectedBuilding}
                 onChange={handleBuildingChange}
                 options={buildingOptions}
-                placeholder="-- Selecciona un edificio --"
+                placeholder={
+                  isLoading ? "Cargando edificios..." : "-- Selecciona un edificio --"
+                }
                 className="building-select"
                 styles={customStyles}
                 formatOptionLabel={formatOptionLabel}
                 isSearchable={false}
+                isDisabled={isLoading} // Deshabilitar mientras carga
               />
             </div>
           </div>
