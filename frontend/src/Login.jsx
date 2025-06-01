@@ -18,9 +18,11 @@ function Login({ setToken, setUsername }) {
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
+        console.log("Solicitando lista de edificios...");
         const response = await fetch(`${API_BASE_URL}/api/buildings`);
         if (!response.ok) throw new Error("Error al obtener los edificios");
         const data = await response.json();
+        console.log("Edificios obtenidos:", data);
         setValidBuildings(data);
       } catch (error) {
         console.error("Error al obtener los edificios:", error);
@@ -29,15 +31,23 @@ function Login({ setToken, setUsername }) {
     };
 
     const fetchBackground = async () => {
-      if (!normalizedBuilding) return;
+      if (!normalizedBuilding) {
+        console.log("No hay edificio normalizado, no se solicita fondo.");
+        return;
+      }
       try {
-        const response = await fetch(`${API_BASE_URL}/api/background/${normalizedBuilding}`);
-        if (!response.ok) throw new Error("Error al obtener el fondo");
+        const url = `${API_BASE_URL}/api/background/${normalizedBuilding}`;
+        console.log("Solicitando fondo desde:", url);
+        const response = await fetch(url);
+        console.log("Respuesta del servidor:", response.status, response.statusText);
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const data = await response.json();
+        console.log("Datos de la imagen:", data);
         setBackgroundImage(`${API_BASE_URL}${data.backgroundImage}`);
       } catch (error) {
         console.error("Error al obtener el fondo:", error);
-        setBackgroundImage("/assets/fallback.jpg"); // Usa una imagen local como fallback
+        // Fallback a una URL externa confiable si la imagen local falla
+        setBackgroundImage("https://via.placeholder.com/1500x500"); // Temporalmente usamos esta hasta que configures una imagen local
       }
     };
 
