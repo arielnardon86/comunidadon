@@ -22,8 +22,11 @@ function Login({ setToken, setUsername }) {
         const response = await fetch(`${API_BASE_URL}/api/buildings`);
         if (!response.ok) throw new Error("Error al obtener los edificios");
         const data = await response.json();
-        console.log("Edificios obtenidos:", data);
-        setValidBuildings(data);
+        console.log("Edificios obtenidos (crudos):", data);
+        // Normalizar los edificios
+        const normalizedBuildings = data.map(b => b.toLowerCase().replace(/\s+/g, "-"));
+        console.log("Edificios normalizados:", normalizedBuildings);
+        setValidBuildings(normalizedBuildings);
       } catch (error) {
         console.error("Error al obtener los edificios:", error);
         setValidBuildings(["vow"]); // Fallback a 'vow' si falla
@@ -46,8 +49,7 @@ function Login({ setToken, setUsername }) {
         setBackgroundImage(`${API_BASE_URL}${data.backgroundImage}`);
       } catch (error) {
         console.error("Error al obtener el fondo:", error);
-        // Fallback a una URL externa confiable si la imagen local falla
-        setBackgroundImage("https://via.placeholder.com/1500x500"); // Temporalmente usamos esta hasta que configures una imagen local
+        setBackgroundImage("https://via.placeholder.com/1500x500"); // Fallback temporal
       }
     };
 
