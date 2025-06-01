@@ -13,6 +13,8 @@ function Login({ setToken, setUsername }) {
   const { building } = useParams();
   const navigate = useNavigate();
 
+  const normalizedBuilding = building ? building.toLowerCase().replace(/\s+/g, "-") : null;
+
   useEffect(() => {
     const fetchBuildings = async () => {
       try {
@@ -27,29 +29,28 @@ function Login({ setToken, setUsername }) {
     };
 
     const fetchBackground = async () => {
-      if (!building) return; // Evitar solicitud si no hay building
+      if (!normalizedBuilding) return;
       try {
-        const response = await fetch(`${API_BASE_URL}/api/background/${building}`);
+        const response = await fetch(`${API_BASE_URL}/api/background/${normalizedBuilding}`);
         if (!response.ok) throw new Error("Error al obtener el fondo");
         const data = await response.json();
-        // Construir la URL completa usando API_BASE_URL
         setBackgroundImage(`${API_BASE_URL}${data.backgroundImage}`);
       } catch (error) {
         console.error("Error al obtener el fondo:", error);
-        setBackgroundImage("https://via.placeholder.com/1500x500"); // Fallback
+        setBackgroundImage("/assets/fallback.jpg"); // Usa una imagen local como fallback
       }
     };
 
     fetchBuildings();
     fetchBackground();
-  }, [building, API_BASE_URL]); // Recargar cuando cambie building
+  }, [normalizedBuilding, API_BASE_URL]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!building || (validBuildings.length > 0 && !validBuildings.includes(building))) {
-      console.error("Building no válido:", building);
+    if (!normalizedBuilding || (validBuildings.length > 0 && !validBuildings.includes(normalizedBuilding))) {
+      console.error("Building no válido:", normalizedBuilding);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -60,7 +61,7 @@ function Login({ setToken, setUsername }) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/${building}/api/login`, {
+      const response = await fetch(`${API_BASE_URL}/${normalizedBuilding}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,7 +82,7 @@ function Login({ setToken, setUsername }) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", usernameInput);
 
-      const destinationRoute = `/${building}`;
+      const destinationRoute = `/${normalizedBuilding}`;
       navigate(destinationRoute);
 
       Swal.fire({
@@ -114,7 +115,7 @@ function Login({ setToken, setUsername }) {
       }}
     >
       <div className="login-box">
-        <h2>Iniciar Sesión - {building?.replace("-", " ").toUpperCase() || "Selecciona un edificio"}</h2>
+        <h2>Iniciar Sesión - {normalizedBuilding?.replace("-", " ").toUpperCase() || "Selecciona un edificio"}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>Usuario:</label>
