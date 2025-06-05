@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import Schedule from "./Schedule";
+import Modification from "./Modification";
 import ClubInfo from "./ClubInfo";
 import { API_BASE_URL } from "../config";
 
@@ -20,6 +21,29 @@ function Dashboard({
   const [loadingReservations, setLoadingReservations] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [showManagement, setShowManagement] = useState(false);
+
+  // Función para decodificar el token
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Error al decodificar el token en Dashboard:", error);
+      return null;
+    }
+  };
+
+  const decodedToken = decodeToken(token);
+  const isAdmin = decodedToken?.username === "admin";
+  console.log("isAdmin en Dashboard:", isAdmin);
 
   useEffect(() => {
     console.log("Building en useEffect:", building);
@@ -99,7 +123,7 @@ function Dashboard({
 
   return (
     <div className="dashboard-container">
-      <div className="content">
+      <div className="content" style={{ marginTop: "20px", textAlign: "left", width: "100%" }}>
         <h1>Reservas - {building.replace("-", " ").toUpperCase()}</h1>
         {loadingTables || loadingReservations ? (
           <p>Cargando datos...</p>
@@ -111,10 +135,26 @@ function Dashboard({
               setReservations={setReservations}
               token={token}
               username={username}
-              selectedBuilding={building} // Usamos el prop building
+              selectedBuilding={building}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
             />
+            {isAdmin && (
+              <div className="mt-16 max-w-md mx-auto">
+                <button
+                  onClick={() => setShowManagement(!showManagement)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition-colors duration-200"
+                  style={{ backgroundColor: "#3b82f6", color: "#fff", padding: "0.5rem 1rem", borderRadius: "0.375rem" }}
+                >
+                  {showManagement ? "Ocultar Gestión de Usuarios" : "Gestionar Usuarios"}
+                </button>
+                {showManagement && (
+                  <div className="mt-6 mb-8">
+                    <Modification token={token} building={building} />
+                  </div>
+                )}
+              </div>
+            )}
             <ClubInfo building={building} token={token} />
           </>
         )}
