@@ -7,8 +7,9 @@ function Register({ setToken, setShowRegister }) {
   const [phone_number, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const apiUrl = import.meta.env.VITE_API_URL || "https://comunidadon-backend.onrender.com";
+  const token = import.meta.env.VITE_ADMIN_TOKEN || localStorage.getItem("token");
 
-  // Función para decodificar el payload del token JWT (sin verificar la firma)
+  // Función para decodificar el payload del token JWT
   const decodeToken = (token) => {
     try {
       const base64Url = token.split(".")[1];
@@ -26,21 +27,15 @@ function Register({ setToken, setShowRegister }) {
     }
   };
 
+  const decodedToken = decodeToken(token);
+  const building = decodedToken?.building?.toLowerCase().replace(/\s+/g, "-");
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (!token || !building) {
+      throw new Error("Token o edificio no disponibles.");
+    }
     try {
-      const token = import.meta.env.VITE_ADMIN_TOKEN || localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token de administrador no encontrado. Configura VITE_ADMIN_TOKEN en .env o inicia sesión.");
-      }
-
-      // Decodificar el token para obtener el building
-      const decodedToken = decodeToken(token);
-      if (!decodedToken || !decodedToken.building) {
-        throw new Error("No se pudo determinar el edificio desde el token.");
-      }
-      const building = decodedToken.building;
-
       const response = await fetch(`${apiUrl}/${building}/api/register`, {
         method: "POST",
         headers: {
